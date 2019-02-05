@@ -23,6 +23,7 @@ set (CPP_FILES
 	src/model/model.cpp
 	src/model/modelProperties.cpp
 	src/model/performOneStep.cpp
+	src/model/modelToGraphviz.cpp
 )
 
 set (TEST_FILES

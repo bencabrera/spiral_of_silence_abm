@@ -18,6 +18,8 @@ class Model
 		double _bot_influence = 1.0;
 		double _alpha = 1.0;
 
+		// global non-interpreted model properties found in .gml file
+
 		// initial properties read from input file
 		VertexPropertyMap<Valence> _valence;
 		VertexPropertyMap<double> _expression_threshold;
@@ -25,6 +27,7 @@ class Model
 		VertexPropertyMap<bool> _is_bot;
 
 	public:
+		std::map<std::string,std::string> global_properties;
 
 		// helper methods
 		inline const Graph& graph() const
@@ -68,7 +71,7 @@ class Model
 
 		inline double confidence(Vertex v) const
 		{
-			return 2.0 / (1.0 + exp((-1.0) * inner_confidence(v))) - 1.0;
+			return std::max(2.0 / (1.0 + exp((-1.0) * inner_confidence(v))) - 1.0, 0.0);
 		}
 
 		inline bool is_silenced(Vertex v) const

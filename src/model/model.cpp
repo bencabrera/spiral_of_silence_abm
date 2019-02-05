@@ -33,9 +33,17 @@ Model Model::read_from_gml(std::istream& istr)
 	}
 
 	if(graph_attributes.count("bot_influence"))
+	{
 		m._bot_influence = std::stod(graph_attributes["bot_influence"]);
+		graph_attributes.erase("bot_influence");
+	}
 	if(graph_attributes.count("alpha"))
+	{
 		m._alpha = std::stod(graph_attributes["alpha"]);
+		graph_attributes.erase("alpha");
+	}
+
+	m.global_properties = graph_attributes;
 
 	return m;
 }

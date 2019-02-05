@@ -135,9 +135,7 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 {
 	const std::string text(std::istreambuf_iterator<char>(istr), {});
 
-	const std::regex directed_regex("directed ([01])");
-	const std::regex bot_influence_regex("bot_influence ([0-9\\.]+)");
-	const std::regex alpha_regex("alpha ([0-9\\.]+)");
+	const std::regex graph_attributes_regex("graph\\s*\\[([^\\[]+)");
 	const std::regex node_regex("node *\\[([^\\]]+)");
 	const std::regex edge_regex("edge *\\[([^\\]]+)");
 
@@ -146,38 +144,28 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 	std::map<std::string, VertexPropertyMap<std::string>> vertex_labels;
 	std::map<std::string, EdgePropertyMap<std::string>> edge_labels;
 
-	// directedness
-	bool directed = false;
+	// get graph attributes
+	std::map<std::string,std::string> graph_labels;
 	{
-		std::sregex_iterator dir_it_begin(text.begin(), text.end(), directed_regex);
+		std::sregex_iterator dir_it_begin(text.begin(), text.end(), graph_attributes_regex);
 		std::sregex_iterator dir_it_end;
 		if(dir_it_begin != dir_it_end)
 		{
 			std::string val = (*dir_it_begin)[1];
-			directed = val == "1";
+			std::string clean = std::regex_replace(val, std::regex("graph\\s*\\["), "");
+			clean = std::regex_replace(clean, std::regex("node"), "");
+			clean = std::regex_replace(clean, std::regex("\\n\\s+"), "\n");
+			boost::trim(clean);
+			graph_labels = break_into_key_value_pairs(clean);
 		}
 	}
 
-	// bot_influence
-	std::string bot_influence_str;
+	// directedness
+	bool directed = false;
+	if(graph_labels.count("directed"))
 	{
-		std::sregex_iterator dir_it_begin(text.begin(), text.end(), bot_influence_regex);
-		std::sregex_iterator dir_it_end;
-		if(dir_it_begin != dir_it_end)
-		{
-			bot_influence_str = (*dir_it_begin)[1];
-		}
-	}
-
-	// alpha
-	std::string alpha_str;
-	{
-		std::sregex_iterator dir_it_begin(text.begin(), text.end(), alpha_regex);
-		std::sregex_iterator dir_it_end;
-		if(dir_it_begin != dir_it_end)
-		{
-			alpha_str = (*dir_it_begin)[1];
-		}
+		directed = graph_labels["directed"] == "1";
+		graph_labels.erase("directed");
 	}
 
 	// extract nodes
@@ -237,7 +225,7 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 			throw FormatException("Edge could not be added.");
 		boost::put(boost::edge_index, graph, e, i_edge++);
 
-		// is undirected also add edge in other direction
+		// if is undirected also add edge in other direction
 		if(!directed)
 		{
 			auto [e2,added2] = boost::add_edge(t,s,graph);
@@ -255,12 +243,6 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 				edge_labels[p.first][e] = p.second;
 		}
 	}
-
-	std::map<std::string,std::string> graph_labels;
-	if(!bot_influence_str.empty())
-		graph_labels["bot_influence"] = bot_influence_str;
-	if(!alpha_str.empty())
-		graph_labels["alpha"] = alpha_str;
 
 	return {graph, vertex_labels, edge_labels,graph_labels};
 }
