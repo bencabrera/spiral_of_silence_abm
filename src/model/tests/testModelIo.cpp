@@ -53,7 +53,7 @@ TEST_CASE("Reading paper example should work and values should match.","[io]")
 
 TEST_CASE("Reading and writing and reading again should yield same model.","[io]") 
 {
-	auto filepath = instance_path("/tests/ejis_paper_example_undirected.gml");
+	auto filepath = instance_path("/ejis_paper_example.gml");
 	std::ifstream file(filepath);
 
 	REQUIRE(file.is_open());
@@ -102,5 +102,18 @@ TEST_CASE("Reading and writing and reading again should yield same model.","[io]
 	REQUIRE(m.is_silenced(2) == m2.is_silenced(2));
 	REQUIRE(m.is_silenced(3) == m2.is_silenced(3));
 	REQUIRE(m.is_silenced(4) == m2.is_silenced(4));
+}
+
+TEST_CASE("Undirected graph should have edges in both directions","[io]") 
+{
+	auto filepath = instance_path("/tests/ejis_paper_example_undirected.gml");
+	std::ifstream file(filepath);
+	REQUIRE(file.is_open());
+	auto m = Model::read_from_gml(file);
+
+	auto& g = m.graph();
+
+	for (auto e : edges(g)) 
+		REQUIRE(boost::edge(boost::target(e,g),boost::source(e,g),g).second);
 }
 

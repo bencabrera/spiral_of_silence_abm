@@ -81,5 +81,14 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 		m._inner_confidence[v] = draw_from_distribution(params.inner_confidence_init,mt);
 	}
 
+	m._valence = VertexPropertyMap<Valence>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
+	std::uniform_real_distribution<double> unif_0_1(0,1);
+	for (auto v : vertices(m.g)) {
+		if(unif_0_1(mt) < params.ratio_valence_green)
+			m._valence[v] = GREEN;
+		else
+			m._valence[v] = RED;
+	}
+
 	return m;
 }

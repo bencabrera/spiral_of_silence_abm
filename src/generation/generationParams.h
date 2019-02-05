@@ -6,6 +6,7 @@ class GenerationParams {
 	public:
 		std::size_t n_user = 1000;
 		std::size_t n_bots = 10;
+		double ratio_valence_green = 0.5;
 
 		std::string expression_threshold_init = "Unif(0,1)";	
 		std::string inner_confidence_init = "Unif(0,1)";	

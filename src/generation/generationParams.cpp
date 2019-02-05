@@ -25,6 +25,8 @@ GenerationParams GenerationParams::parse_from_json(std::istream& istr)
 		params.bot_attachment_method = obj["bot_attachment_method"].get<std::string>();
 	if(obj.count("is_directed"))
 		params.is_directed = obj["is_directed"].get<bool>();
+	if(obj.count("ratio_valence_green"))
+		params.ratio_valence_green = obj["ratio_valence_green"].get<double>();
 
 	return params;
 }
@@ -41,6 +43,7 @@ void GenerationParams::write_to_json(std::ostream& ostr)
 	obj["network_model"] = network_model;
 	obj["bot_attachment_method"] = bot_attachment_method;
 	obj["is_directed"] = is_directed;
+	obj["ratio_valence_green"] = ratio_valence_green;
 
 	ostr << obj;
 }
