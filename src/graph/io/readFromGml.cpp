@@ -160,13 +160,12 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 		}
 	}
 
-	// directedness
-	bool directed = false;
-	if(graph_labels.count("directed"))
-	{
-		directed = graph_labels["directed"] == "1";
-		graph_labels.erase("directed");
-	}
+	// // directedness
+	// bool directed = false;
+	// if(graph_labels.count("directed"))
+	// {
+		// directed = graph_labels["directed"] == "1";
+	// }
 
 	// extract nodes
 	std::sregex_iterator outer_node_it_begin(text.begin(), text.end(), node_regex);
@@ -226,12 +225,12 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 		boost::put(boost::edge_index, graph, e, i_edge++);
 
 		// if is undirected also add edge in other direction
-		if(!directed)
-		{
-			auto [e2,added2] = boost::add_edge(t,s,graph);
-			if(added2)
-				boost::put(boost::edge_index, graph, e2, i_edge++);
-		}
+		// if(!directed)
+		// {
+			// auto [e2,added2] = boost::add_edge(t,s,graph);
+			// if(added2)
+				// boost::put(boost::edge_index, graph, e2, i_edge++);
+		// }
 
 		key_values.erase("id");
 		key_values.erase("source");
@@ -244,5 +243,5 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 		}
 	}
 
-	return {graph, vertex_labels, edge_labels,graph_labels};
+	return {graph, vertex_labels, edge_labels, graph_labels};
 }

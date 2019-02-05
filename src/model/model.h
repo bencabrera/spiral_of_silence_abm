@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../graph/graph.h"
+#include <random>
 
 #include <iostream>
+
+class GenerationParams;
 
 enum Valence {
 	GREEN,
@@ -17,6 +20,7 @@ class Model
 		// global model parameters
 		double _bot_influence = 1.0;
 		double _alpha = 1.0;
+		bool _is_directed = false;
 
 		// global non-interpreted model properties found in .gml file
 
@@ -87,5 +91,8 @@ class Model
 		// (helper) properties that are set after initialization of while running simulation
 
 		static Model read_from_gml(std::istream& istr);
+		void write_to_gml(std::ostream& ostr);
+
+		friend Model generate(GenerationParams,std::mt19937&);
 };
 

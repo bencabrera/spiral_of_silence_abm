@@ -27,10 +27,13 @@ namespace {
 	}
 }
 
-void write_to_gml(std::ostream& ostr, const Graph& g, std::map<std::string, VertexPropertyMap<std::string>> vertex_labels, std::map<std::string, EdgePropertyMap<std::string>> edge_labels)
+void write_to_gml(std::ostream& ostr, const Graph& g, std::map<std::string, VertexPropertyMap<std::string>> vertex_labels, std::map<std::string, EdgePropertyMap<std::string>> edge_labels, std::map<std::string,std::string> graph_labels)
 {
 	ostr << "graph [" << std::endl;
-	ostr << INDENT << "directed 1" << std::endl;
+
+	for (auto [k,v] : graph_labels) {
+		ostr << INDENT << k << " " << v << std::endl;	
+	}
 
 	for(auto v : vertices(g))
 	{

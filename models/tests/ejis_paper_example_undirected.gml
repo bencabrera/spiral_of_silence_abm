@@ -1,5 +1,5 @@
 graph [
-	directed 1
+	directed 0
 	bot_influence 0.8
 	prop1 bla
 

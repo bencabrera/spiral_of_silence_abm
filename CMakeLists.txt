@@ -24,17 +24,25 @@ set (CPP_FILES
 	src/model/modelProperties.cpp
 	src/model/performOneStep.cpp
 	src/model/modelToGraphviz.cpp
+
+	src/generation/generation.cpp
+	src/generation/generationParams.cpp
 )
 
 set (TEST_FILES
-	src/model/tests/testModel.cpp
+	src/graph/tests/testGraphIo.cpp
+	src/model/tests/testModelIo.cpp
+	src/model/tests/testPerformOneStep.cpp
 )
 
 # programs
 add_executable(simulation src/main_simulation.cpp ${CPP_FILES})
 target_link_libraries(simulation fmt)
 target_link_libraries(simulation ${Boost_LIBRARIES})
-# target_link_libraries(compute_weights Boost::filesystem)
+
+add_executable(generation src/main_generation.cpp ${CPP_FILES})
+target_link_libraries(generation fmt)
+target_link_libraries(generation ${Boost_LIBRARIES})
 
 # tests
 add_executable(tests src/tests/main_tests.cpp ${TEST_FILES} ${CPP_FILES})

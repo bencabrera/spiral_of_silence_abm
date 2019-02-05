@@ -1,5 +1,6 @@
 #include "model.h"
 #include "../graph/io/readFromGml.h"
+#include "../graph/io/writeToGml.h"
 #include "../exceptions/formatException.h"
 
 Model Model::read_from_gml(std::istream& istr)
@@ -42,8 +43,37 @@ Model Model::read_from_gml(std::istream& istr)
 		m._alpha = std::stod(graph_attributes["alpha"]);
 		graph_attributes.erase("alpha");
 	}
+	if(graph_attributes.count("directed"))
+	{
+		m._is_directed = graph_attributes["directed"] == "1";
+		graph_attributes.erase("directed");
+	}
 
 	m.global_properties = graph_attributes;
 
 	return m;
+}
+
+void Model::write_to_gml(std::ostream& ostr)
+{
+	std::map<std::string, VertexPropertyMap<std::string>> vertex_attributes;
+	std::map<std::string, VertexPropertyMap<std::string>> edge_attributes;
+	std::map<std::string, std::string> graph_attributes;
+
+	vertex_attributes["is_bot"] = convert<bool,std::string>(g,_is_bot);
+	vertex_attributes["inner_confidence"] = convert<double,std::string>(g,_inner_confidence);
+	vertex_attributes["expression_threshold"] = convert<double,std::string>(g,_expression_threshold);
+
+	VertexPropertyMap<std::string> valence_strings(boost::num_vertices(g), boost::get(boost::vertex_index, g));
+	for (auto v : vertices(g)) {
+		valence_strings[v] = _valence[v] == GREEN ? "green" : "red";
+	}
+	vertex_attributes["valence"] = valence_strings;
+
+	graph_attributes = global_properties;
+	graph_attributes["directed"] = _is_directed ? "1" : "0";
+	graph_attributes["bot_influence"] = std::to_string(_bot_influence);
+	graph_attributes["alpha"] = std::to_string(_alpha);
+
+	::write_to_gml(ostr, g, vertex_attributes, {}, graph_attributes);
 }
