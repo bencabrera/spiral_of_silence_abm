@@ -1,6 +1,6 @@
 #include "performOneStep.h"
 
-StepResults perform_one_step(Model& m)
+StepResults perform_one_step(Model& m, double epsilon)
 {
 	StepResults rtn;
 
@@ -60,7 +60,7 @@ StepResults perform_one_step(Model& m)
 
 		m.inner_confidence(v) += m.alpha() * delta;
 
-		if(std::abs(old_confidence-m.confidence(v)) > m.epsilon() && !m.is_bot(v))
+		if(std::abs(old_confidence-m.confidence(v)) > epsilon && !m.is_bot(v))
 			rtn.n_humans_not_changed_confidence++;
 	}
 

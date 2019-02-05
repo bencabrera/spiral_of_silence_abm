@@ -4,14 +4,11 @@
 
 Model Model::read_from_gml(std::istream& istr)
 {
-	throw FormatException("Reading bot_influence not implemented");
-	throw FormatException("Reading alpha not implemented");
-
 	Model m;
-	auto [g,vertex_attributes,edge_attributes] = ::read_from_gml(istr);
+	auto [g,vertex_attributes,edge_attributes,graph_attributes] = ::read_from_gml(istr);
 	m.g = g;
 
-	const std::vector<std::string> mandatory_properties = {"valence", "expression_threshold", "inner_confidence", "is_bot"};
+	const std::vector<std::string> mandatory_properties = {"valence", "expression_threshold", "inner_confidence"};
 	for (auto p : mandatory_properties) {
 		if(!vertex_attributes.count(p))
 			throw FormatException("The mandatory property '" + p + "' does not exist in input graph.");
@@ -24,9 +21,21 @@ Model Model::read_from_gml(std::istream& istr)
 
 	m._expression_threshold = convert<std::string,double>(g,vertex_attributes["expression_threshold"]);
 	m._inner_confidence = convert<std::string,double>(g,vertex_attributes["inner_confidence"]);
-	m._is_bot = convert<std::string,bool>(g,vertex_attributes["is_bot"]);
 
-	// TODO: make two directional edges for undirectzed graph nin reading gml
+	if(vertex_attributes.count("is_bot"))
+		m._is_bot = convert<std::string,bool>(g,vertex_attributes["is_bot"]);
+	else
+	{
+		m._is_bot = VertexPropertyMap<bool>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
+		for (auto v : vertices(g)) {
+			m._is_bot[v] = false;
+		}
+	}
+
+	if(graph_attributes.count("bot_influence"))
+		m._bot_influence = std::stod(graph_attributes["bot_influence"]);
+	if(graph_attributes.count("alpha"))
+		m._alpha = std::stod(graph_attributes["alpha"]);
 
 	return m;
 }

@@ -2,6 +2,8 @@
 
 #include "../graph/graph.h"
 
+#include <iostream>
+
 enum Valence {
 	GREEN,
 	RED
@@ -13,9 +15,8 @@ class Model
 		Graph g;
 
 		// global model parameters
-		double _bot_influence;
-		double _alpha;
-		double _epsilon;
+		double _bot_influence = 1.0;
+		double _alpha = 1.0;
 
 		// initial properties read from input file
 		VertexPropertyMap<Valence> _valence;
@@ -38,10 +39,6 @@ class Model
 		inline double alpha() const
 		{
 			return _alpha;
-		}
-		inline double epsilon() const
-		{
-			return _epsilon;
 		}
 
 		inline Valence valence(Vertex v) const
@@ -76,7 +73,12 @@ class Model
 
 		inline bool is_silenced(Vertex v) const
 		{
-			return confidence(v) > expression_threshold(v);
+			return confidence(v) <= expression_threshold(v);
+		}
+
+		inline bool is_speaking_out(Vertex v) const
+		{
+			return !is_silenced(v);
 		}
 
 		// (helper) properties that are set after initialization of while running simulation

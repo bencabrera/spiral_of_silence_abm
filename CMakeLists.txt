@@ -26,10 +26,17 @@ set (CPP_FILES
 )
 
 set (TEST_FILES
+	src/model/tests/testModel.cpp
 )
 
-# CLI programs
+# programs
 add_executable(simulation src/main_simulation.cpp ${CPP_FILES})
 target_link_libraries(simulation fmt)
 target_link_libraries(simulation ${Boost_LIBRARIES})
 # target_link_libraries(compute_weights Boost::filesystem)
+
+# tests
+add_executable(tests src/tests/main_tests.cpp ${TEST_FILES} ${CPP_FILES})
+target_link_libraries(tests fmt)
+target_link_libraries(tests ${Boost_LIBRARIES})
+target_compile_definitions(tests PRIVATE TEST_MODELS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/models/")
