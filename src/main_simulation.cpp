@@ -10,7 +10,8 @@
 
 #include "model/model.h"
 #include "model/modelProperties.hpp"
-#include "model/performOneStep.h"
+#include "simulation/simulateUntilStable.h"
+#include "simulation/writeSimulationResultsToCsv.h"
 #include "model/modelToGraphviz.h"
 
 int main(int argc, const char** argv)
@@ -74,88 +75,22 @@ int main(int argc, const char** argv)
 		draw_to_graphviz(graphviz_file, m, graphviz_options);			
 	}
 
-	StepResults res;
-	do {
+	SimulationResults simulation_results = simulate_until_stable(m, epsilon, [&args, &wait_for_input, &graphviz_options](Model& m) {
 		if(wait_for_input)
 			std::cin.get();
-
-		res = perform_one_step(m,epsilon);
 
 		if(args.count("step-to-graphviz"))
 		{
 			std::ofstream graphviz_file(args["step-to-graphviz"].as<std::string>());
 			draw_to_graphviz(graphviz_file, m, graphviz_options);			
 		}
-	}
-	while(res.n_humans_not_changed_confidence != 0);
+	});
 
 	if(args.count("stationary-config-csv-output"))
 	{
 		const std::string csv_path = args["stationary-config-csv-output"].as<std::string>();
 
-		// if file empty -> add header
-		bool header = true;
-		std::ifstream csv_file_test(csv_path);
-		if(csv_file_test.good())
-			header = false;
-		csv_file_test.close();
-
-		std::ofstream csv_file(csv_path, std::ios_base::app);
-		if(header)
-		{
-			for (auto [k,v] : m.global_properties) {
-				csv_file << k << ",";
-			}
-
-			csv_file << "n_individuals, n_users, n_bots, alpha, n_silenced" << std::endl;
-		}
-
-		for (auto [k,v] : m.global_properties) {
-			csv_file << "\"" << v << "\"" << ",";
-		}
-
-		// n_individuals
-		csv_file << boost::num_vertices(m.graph()) << ",";
-		// n_users
-		csv_file << count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return !m.is_bot(v); }) << ",";
-		// n_bots
-		csv_file << count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.is_bot(v); }) << ",";
-		// alpha
-		csv_file << m.alpha() << ",";
-		// n_silenced
-		csv_file << count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.is_silenced(v); });
-
-		csv_file << std::endl;
-// [1] "m"                                         
-// "n_users",
-// "n_bots",
-// "alpha",
-// "gamma",
-// "bot_attachment_method",
-// "percent_positive_valence",
-// "confidence_initialization_method",
-// "expression_threshold_initialization_method",
-// "bot_influence",
-// "link_type_is_directed",
-// "percent_green",
-// "percent_red",
-// "percent_gray",
-// "red_wins",
-// "green_wins",
-// "ticks_until_stable",
-// "percent_0_color_flips",
-// "percent_1_color_flips",
-// "percent_2_color_flips",
-// "percent_more_color_flips",
-// "percent_accuracy_below_50",
-// "percent_accuracy_50_to_60",
-// "percent_accuracy_60_to_70",
-// "percent_accuracy_70_to_80",
-// "percent_accuracy_80_to_90",
-// "percent_accuracy_above_90",
-// "color_most_central_before",
-// "color_most_central_after",
-// "opinion_most_central"
+		write_simulation_results_to_csv(csv_path, simulation_results, m);
 	}
 
 	return 0;

@@ -115,7 +115,7 @@ namespace GraphGeneration {
 
 				
 			// --- loop ---
-			for(std::size_t i = m+2; i < n; i++)
+			for(std::size_t i = m+1; i < n; i++)
 			{
 				// find all vertices to connect to
 				std::set<typename TBoostGraph::vertex_descriptor> vertices_to_connect_to;	

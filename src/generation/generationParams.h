@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../model/model.h"
+#include "../../libs/json/json.hpp"
 
 class GenerationParams {
 	public:
@@ -16,5 +17,9 @@ class GenerationParams {
 		bool is_directed = false;
 
 		static GenerationParams parse_from_json(std::istream& istr);
+		static GenerationParams parse_from_json(nlohmann::json obj);
 		void write_to_json(std::ostream& ostr);
 };
+
+std::vector<GenerationParams> build_param_space_from_json(std::istream& istr);
+std::vector<GenerationParams> build_param_space_from_json(nlohmann::json obj);

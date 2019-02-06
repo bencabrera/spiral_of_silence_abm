@@ -1,6 +1,6 @@
 #include "../../../libs/catch/catch.hpp"
 #include "../../tests/test_helpers.hpp"
-#include "../model.h"
+#include "../../model/model.h"
 #include "../performOneStep.h"
 #include <fstream>
 

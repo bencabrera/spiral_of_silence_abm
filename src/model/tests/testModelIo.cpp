@@ -1,7 +1,6 @@
 #include "../../../libs/catch/catch.hpp"
 #include "../../tests/test_helpers.hpp"
 #include "../model.h"
-#include "../performOneStep.h"
 #include <fstream>
 
 TEST_CASE("Reading paper example should work and values should match.","[io]") 

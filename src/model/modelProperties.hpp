@@ -14,10 +14,4 @@ std::size_t count_vertices_with_predicate(const Model& m, Pred f)
 	return n;
 }
 
-// std::size_t n_silenced(const Model& m);
-// std::size_t n_green(const Model& m);
-// std::size_t n_red(const Model& m);
-// std::size_t n_green_silenced(const Model& m);
-// std::size_t n_red_silenced(const Model& m);
-// std::size_t n_bots(const Model& m);
-
+Vertex most_central_vertex(const Model& m);

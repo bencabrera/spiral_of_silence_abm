@@ -9,10 +9,6 @@
 #include "../libs/cxxopts/cxxopts.hpp"
 
 #include "model/model.h"
-#include "model/modelProperties.hpp"
-#include "model/performOneStep.h"
-#include "model/modelToGraphviz.h"
-
 #include "generation/generationParams.h"
 #include "generation/generation.h"
 

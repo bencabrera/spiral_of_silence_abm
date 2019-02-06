@@ -1,0 +1,17 @@
+{
+    "bot_attachment_method": [
+		"BarabasiAlbert(1)",
+		"BarabasiAlbert(2)",
+		"BarabasiAlbert(3)"
+	],
+    "expression_threshold_init": [
+		"Unif(0,1)",
+		"Unif(0,2)"
+	],
+    "inner_confidence_init": ["Unif(0,1)"],
+    "is_directed": [false],
+    "n_bots": [10],
+    "n_user": [50],
+    "network_model": ["BarabasiAlbert(3)"],
+    "ratio_valence_green": [0.5]
+}

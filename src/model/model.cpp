@@ -2,6 +2,7 @@
 #include "../graph/io/readFromGml.h"
 #include "../graph/io/writeToGml.h"
 #include "../exceptions/formatException.h"
+#include "../graph/graphHelper.h"
 
 Model Model::read_from_gml(std::istream& istr)
 {
@@ -12,18 +13,8 @@ Model Model::read_from_gml(std::istream& istr)
 	// if undirected add edges in inverse direction
 	if(graph_attributes.count("directed") && graph_attributes["directed"] == "0")
 	{
-		std::vector<std::pair<Vertex,Vertex>> vertex_pairs;
-		for (auto e : edges(m.g)) {
-			vertex_pairs.push_back({ boost::source(e,m.g), boost::target(e,m.g) });	
-		}
-		std::size_t i_edge = boost::num_edges(m.g);
-		for (auto [v1,v2] : vertex_pairs) {
-			if(!boost::edge(v2,v1,m.g).second)
-			{
-				auto [e,added] = boost::add_edge(v2,v1,m.g);
-				boost::put(boost::edge_index, m.g, e, i_edge++);
-			}
-		}
+		add_inverse_edges(g);
+		set_increasing_indices(g);
 	}
 
 	const std::vector<std::string> mandatory_properties = {"valence", "expression_threshold", "inner_confidence"};

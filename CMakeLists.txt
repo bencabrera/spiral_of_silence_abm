@@ -19,26 +19,36 @@ set (CPP_FILES
 	src/graph/graph.cpp
 	src/graph/io/readFromGml.cpp
 	src/graph/io/writeToGml.cpp
+	src/graph/graphHelper.cpp
 
 	src/model/model.cpp
 	src/model/modelProperties.cpp
-	src/model/performOneStep.cpp
 	src/model/modelToGraphviz.cpp
 
 	src/generation/generation.cpp
 	src/generation/generationParams.cpp
+	src/generation/botAdding.cpp
+
+	src/simulation/performOneStep.cpp
+	src/simulation/simulateUntilStable.cpp
+	src/simulation/writeSimulationResultsToCsv.cpp
 )
 
 set (TEST_FILES
 	src/graph/tests/testGraphIo.cpp
 	src/model/tests/testModelIo.cpp
-	src/model/tests/testPerformOneStep.cpp
+	src/generation/tests/testGenerationParams.cpp
+	src/simulation/tests/testPerformOneStep.cpp
 )
 
 # programs
 add_executable(simulation src/main_simulation.cpp ${CPP_FILES})
 target_link_libraries(simulation fmt)
 target_link_libraries(simulation ${Boost_LIBRARIES})
+
+add_executable(extended_simulation src/main_extendedSimulation.cpp ${CPP_FILES})
+target_link_libraries(extended_simulation fmt)
+target_link_libraries(extended_simulation ${Boost_LIBRARIES})
 
 add_executable(generation src/main_generation.cpp ${CPP_FILES})
 target_link_libraries(generation fmt)

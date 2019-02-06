@@ -89,6 +89,20 @@ class Model
 		}
 
 		// (helper) properties that are set after initialization of while running simulation
+		
+		inline std::vector<std::pair<std::string,std::string>> all_global_property_strs() const
+		{
+			std::vector<std::pair<std::string,std::string>> rtn;
+			rtn.emplace_back("bot_influence", std::to_string(_bot_influence));
+			rtn.emplace_back("alpha", std::to_string(_alpha));
+			rtn.emplace_back("is_directed", std::to_string(_is_directed));
+
+			for (auto p : global_properties) {
+				rtn.push_back(p);
+			}
+
+			return rtn;
+		}
 
 		static Model read_from_gml(std::istream& istr);
 		void write_to_gml(std::ostream& ostr);

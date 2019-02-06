@@ -6,6 +6,8 @@
 #include <boost/algorithm/string/classification.hpp>
 
 #include "preferentialAttachment/preferentialAttachment.hpp"
+#include "../graph/graphHelper.h"
+#include "botAdding.h"
 
 namespace {
 	std::pair<std::string, std::vector<std::string>> parse_method_call(std::string str)
@@ -53,7 +55,7 @@ namespace {
 
 Model generate(const GenerationParams params, std::mt19937& mt)
 {
-	Model m;	
+	Model model;	
 
 	// build graph via network model
 	Graph g;
@@ -62,33 +64,85 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 		if(method == "BarabasiAlbert")
 		{
 			if(param_strs.size() != 1)
-				throw FormatException("BarabasiAlbert model need m parameter");
+				throw FormatException("BarabasiAlbert model needs m parameter");
 			std::size_t m = std::stoul(param_strs[0]);
 			GraphGeneration::generate_preferential_attachment_directed(g, params.n_user, m, mt);
 		}
 	}
-	m.g = g;
+
+	// add bots to network
+	{
+		std::vector<Vertex> bots;
+		auto [method,param_strs] = parse_method_call(params.network_model);
+		if(method == "BarabasiAlbert")
+		{
+			std::size_t m = 3;
+			if(param_strs.size() < 1)
+			{
+				auto [network_method,network_param_strs] = parse_method_call(params.network_model);
+				if(network_method == "BarabasiAlbert" && network_param_strs.size() == 1)
+					m = std::stoul(network_param_strs[0]);
+				else
+					throw FormatException("BarabasiAlbert model for bot attachment needs m parameter and network model is not BarabasiAlbert.");
+			}
+			else
+				m = std::stoul(param_strs[0]);
+
+			bots = add_bots_via_barabasi_albert(g, m, params.n_bots, mt);
+		}
+		if(method == "Uniform")
+		{
+			std::size_t m = 1;
+			if(param_strs.size() > 0)
+				m = std::stoul(param_strs[0]);
+
+			bots = add_bots_uniformly(g, params.n_bots, mt, m);
+		}
+
+		model._is_bot = VertexPropertyMap<bool>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
+		for (auto v : vertices(g)) 
+			model._is_bot[v] = false;
+		for (auto v : bots) 
+			model._is_bot[v] = true;
+	}
+
+	if(!params.is_directed)
+		add_inverse_edges(g);
+	set_increasing_indices(g);
+
+	model.g = g;
 
 	// initialize expression thresholds
-	m._expression_threshold = VertexPropertyMap<double>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
-	for (auto v : vertices(m.g)) {
-		m._expression_threshold[v] = draw_from_distribution(params.expression_threshold_init,mt);
+	model._expression_threshold = VertexPropertyMap<double>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
+	for (auto v : vertices(model.g)) {
+		if(model.is_bot(v))
+			model._expression_threshold[v] = 0.0;
+		else
+			model._expression_threshold[v] = draw_from_distribution(params.expression_threshold_init,mt);
 	}
 
 	// initialize inner confidences
-	m._inner_confidence = VertexPropertyMap<double>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
-	for (auto v : vertices(m.g)) {
-		m._inner_confidence[v] = draw_from_distribution(params.inner_confidence_init,mt);
+	model._inner_confidence = VertexPropertyMap<double>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
+	for (auto v : vertices(model.g)) {
+		model._inner_confidence[v] = draw_from_distribution(params.inner_confidence_init,mt);
 	}
 
-	m._valence = VertexPropertyMap<Valence>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
+	model._valence = VertexPropertyMap<Valence>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
 	std::uniform_real_distribution<double> unif_0_1(0,1);
-	for (auto v : vertices(m.g)) {
+	for (auto v : vertices(model.g)) {
 		if(unif_0_1(mt) < params.ratio_valence_green)
-			m._valence[v] = GREEN;
+			model._valence[v] = GREEN;
 		else
-			m._valence[v] = RED;
+			model._valence[v] = RED;
 	}
 
-	return m;
+	model._is_directed = params.is_directed;
+
+	// add some properties refering to how model was generated
+	model.global_properties["expression_threshold_init_method"] = params.expression_threshold_init;
+	model.global_properties["inner_confidence_init_method"] = params.inner_confidence_init;
+	model.global_properties["network_model"] = params.network_model;
+	model.global_properties["bot_attachment_method"] = params.bot_attachment_method;
+
+	return model;
 }
