@@ -37,6 +37,8 @@ StepResults perform_one_step(Model& m, double epsilon)
 		}	
 	}
 
+	VertexPropertyMap<double> deltas(boost::num_vertices(g), boost::get(boost::vertex_index, g));
+
 	// update confidence
 	for (auto v : vertices(g)) {
 		auto [n_neighbor_green,n_neighbor_red] = local_opinion_climate[v];
@@ -56,11 +58,18 @@ StepResults perform_one_step(Model& m, double epsilon)
 		if(n_supporter + n_opponents > 0)
 			delta = static_cast<double>(n_supporter - n_opponents) / (n_supporter + n_opponents);
 
+		deltas[v] = delta;
+
 		double old_confidence = m.confidence(v);
 
 		m.inner_confidence(v) += m.alpha() * delta;
 
-		if(std::abs(old_confidence-m.confidence(v)) > epsilon && !m.is_bot(v))
+		double new_confidence = m.confidence(v);
+
+		if((old_confidence <= m.expression_threshold(v) && !m.is_silenced(v)) || (old_confidence > m.expression_threshold(v) && m.is_silenced(v)))
+			rtn.flipped_vertices.push_back(v);
+
+		if(std::abs(old_confidence-new_confidence) > epsilon && !m.is_bot(v))
 			rtn.n_humans_not_changed_confidence++;
 	}
 

@@ -1,30 +1,26 @@
 #include "botAdding.h"
 
-#include "preferentialAttachment/preferentialAttachment.hpp"
+#include <boost/graph/random.hpp>
 
 std::vector<Vertex> add_bots_via_barabasi_albert(Graph& g, std::size_t m, std::size_t n_bots, std::mt19937& mt)
 {
 	std::vector<Vertex> bots;
 
-	std::size_t normalizing_sum_degree = 0;
-	std::vector<Vertex> vertices_sorted_by_degree;
-	for (auto v : boost::make_iterator_range(boost::vertices(g))) 
-	{
-		vertices_sorted_by_degree.push_back(v);
-		normalizing_sum_degree += boost::degree(v,g);
-	}
-	std::sort(vertices_sorted_by_degree.begin(), vertices_sorted_by_degree.end(), [&g](Vertex v1, Vertex v2) { return boost::degree(v1,g) > boost::degree(v2,g); });
+	std::vector<std::size_t> degrees;
+	for (auto v : vertices(g))
+		degrees.push_back(boost::degree(v,g));
+
+	std::discrete_distribution<std::size_t> dist(degrees.begin(),degrees.end());
 
 	for(std::size_t i = 0; i < n_bots; i++)
 	{
 		auto v_bot = boost::add_vertex(g);
 		bots.push_back(v_bot);
-		vertices_sorted_by_degree.push_back(v_bot);
 
 		std::set<Vertex> vertices_to_connect_to;	
 		while(vertices_to_connect_to.size() < m)
 		{
-			auto w = GraphGeneration::draw_vertex(g, mt, vertices_sorted_by_degree, normalizing_sum_degree);
+			auto w = dist(mt);
 			if(vertices_to_connect_to.find(w) == vertices_to_connect_to.end() && v_bot != w)
 				vertices_to_connect_to.insert(w);
 		}
@@ -32,10 +28,6 @@ std::vector<Vertex> add_bots_via_barabasi_albert(Graph& g, std::size_t m, std::s
 		for (auto w : vertices_to_connect_to) {
 			boost::add_edge(v_bot,w,g); // always add bots so that they are influencing
 		}
-
-		normalizing_sum_degree += 2*m;
-
-		std::sort(vertices_sorted_by_degree.begin(), vertices_sorted_by_degree.end(), [&g](Vertex v1, Vertex v2) { return boost::degree(v1,g) > boost::degree(v2,g); });
 	}
 
 	return bots;

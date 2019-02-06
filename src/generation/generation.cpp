@@ -66,11 +66,12 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 			if(param_strs.size() != 1)
 				throw FormatException("BarabasiAlbert model needs m parameter");
 			std::size_t m = std::stoul(param_strs[0]);
-			GraphGeneration::generate_preferential_attachment_directed(g, params.n_user, m, mt);
+			generate_preferential_attachment_directed(g, params.n_user, m, mt);
 		}
 	}
 
 	// add bots to network
+	if(params.n_bots > 0)
 	{
 		std::vector<Vertex> bots;
 		auto [method,param_strs] = parse_method_call(params.network_model);
