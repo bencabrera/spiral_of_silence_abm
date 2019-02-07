@@ -11,6 +11,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -W
 find_package(Boost REQUIRED COMPONENTS filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
+# find threading libraries
+find_package( Threads )
+
 # add fmt library
 add_subdirectory(libs/fmt)
 
@@ -49,6 +52,8 @@ target_link_libraries(simulation ${Boost_LIBRARIES})
 add_executable(extended_simulation src/main_extendedSimulation.cpp ${CPP_FILES})
 target_link_libraries(extended_simulation fmt)
 target_link_libraries(extended_simulation ${Boost_LIBRARIES})
+target_link_libraries(extended_simulation ${Boost_LIBRARIES})
+target_link_libraries(extended_simulation ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(generation src/main_generation.cpp ${CPP_FILES})
 target_link_libraries(generation fmt)
