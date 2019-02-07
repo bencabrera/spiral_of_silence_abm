@@ -44,10 +44,30 @@ void cli_progress_bar(std::size_t i_progress, std::size_t n, std::string additio
 	std::cout.flush();
 }
 
-void run_simulation(std::ostream& csv_file, const std::vector<GenerationParams>& parameter_space, const std::size_t n_runs, std::mt19937 mt, std::mutex& mutex, std::size_t& i_param, const std::size_t n_params, const double epsilon = 1e-4)
+void run_simulation(
+	std::ostream& csv_file, 
+	std::vector<GenerationParams>& parameter_space, 
+	const std::size_t n_runs, 
+	std::mt19937 mt, 
+	std::mutex& csv_mutex, 
+	std::mutex& param_mutex, 
+	std::size_t& i_param, 
+	const std::size_t n_params, 
+	const double epsilon = 1e-4
+)
 {
-	for (auto params : parameter_space) 
+	while(parameter_space.size() > 0)
 	{
+		GenerationParams params;
+		{
+			std::lock_guard<std::mutex> lock(param_mutex);
+			if(parameter_space.size() == 0)
+				break;
+			
+			params = parameter_space.back();
+			parameter_space.pop_back();
+		}
+
 		std::stringstream ss; // first write all lines for one param config to stringstream
 		for(std::size_t i_run = 0; i_run < n_runs; i_run++)
 		{
@@ -61,7 +81,7 @@ void run_simulation(std::ostream& csv_file, const std::vector<GenerationParams>&
 			write_simulation_results_to_csv(ss, simulation_results, m);
 		}
 
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(csv_mutex);
 		i_param++;
 		cli_progress_bar(i_param, n_params);
 		csv_file << ss.rdbuf(); // now write to file after obtaining global lock
@@ -112,26 +132,21 @@ int main(int argc, const char** argv)
 	auto m = generate(parameter_space[0],mt);
 	write_csv_header(csv_file, m);
 
-	// split parameter space into n_threads equal parts
-	std::vector<std::vector<GenerationParams>> thread_params(n_threads);
-	for(std::size_t i = 0; i < parameter_space.size(); i++)
-		thread_params[i%n_threads].push_back(parameter_space[i]);
-
 	std::vector<std::mt19937> mts;
 	std::uniform_int_distribution<std::size_t> unif;
 	for(std::size_t i_thread = 0; i_thread < n_threads; i_thread++)
 		mts.emplace_back(unif(mt));
 
 	std::vector<std::future<void>> futures;
-	std::mutex mutex;
+	std::mutex csv_mutex, param_mutex;
 	std::size_t i_param = 0, n_params = parameter_space.size();
 	{
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(csv_mutex);
 		cli_progress_bar(i_param, n_params);
 	}
 	for(std::size_t i_thread = 0; i_thread < n_threads; i_thread++)
 	{
-		futures.push_back(std::async(std::launch::async, run_simulation, std::ref(csv_file), std::ref(thread_params[i_thread]), n_runs, mts[i_thread], std::ref(mutex), std::ref(i_param), n_params, epsilon));
+		futures.push_back(std::async(std::launch::async, run_simulation, std::ref(csv_file), std::ref(parameter_space), n_runs, mts[i_thread], std::ref(csv_mutex), std::ref(param_mutex), std::ref(i_param), n_params, epsilon));
 	}
 
 	for (auto& f : futures)
