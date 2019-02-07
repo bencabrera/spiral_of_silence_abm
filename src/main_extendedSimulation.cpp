@@ -7,6 +7,8 @@
 #include <future>
 #include <mutex>
 #include <sstream>
+#include <chrono>
+#include <cmath>
 
 #include <boost/graph/topological_sort.hpp>
 
@@ -21,7 +23,7 @@
 #include "simulation/simulateUntilStable.h"
 #include "simulation/writeSimulationResultsToCsv.h"
 
-void cli_progress_bar(std::size_t i_progress, std::size_t n, std::string additional_msg = "", std::size_t bar_width = 80)
+void cli_progress_bar(std::size_t i_progress, std::size_t n, std::string additional_msg = "", std::size_t bar_width = 60)
 {
 	double ratio = static_cast<double>(i_progress) / n;
 	double percentage = 100 * ratio;
@@ -42,6 +44,41 @@ void cli_progress_bar(std::size_t i_progress, std::size_t n, std::string additio
 	std::cout << " " << additional_msg;
 	std::cout << "\r"; // set carriage return
 	std::cout.flush();
+}
+
+void progress_update(std::size_t i_progress, std::size_t n)
+{
+	static auto start_time = std::chrono::steady_clock::now();
+
+	std::string additional_msg = "";
+	if(i_progress > 0)
+	{
+		auto now = std::chrono::steady_clock::now();
+		auto diff = std::chrono::duration<double, std::milli>(now-start_time).count();
+
+		auto to_go = (n - i_progress) * (static_cast<double>(diff) / i_progress);
+
+		auto remainder = to_go;
+		auto hours_to_go = std::floor(remainder / (1000*60*60));
+		remainder = remainder - hours_to_go * (1000*60*60);
+		auto mins_to_go =  std::floor(remainder / (1000*60));
+		remainder = remainder - mins_to_go * (1000*60);
+		auto seconds_to_go =  std::floor(remainder / 1000);
+
+		std::stringstream ss;
+		ss << "[";
+		// if(hours_to_go > 0)
+			ss << hours_to_go << "h ";
+		// if(mins_to_go > 0)
+			ss << std::setw(2) << mins_to_go << "m "; 
+		// if(seconds_to_go > 0)
+			ss << std::setw(2) << seconds_to_go << "s ";
+		ss << "left]";
+
+		additional_msg = ss.str();
+	}
+
+	cli_progress_bar(i_progress, n, additional_msg);
 }
 
 void run_simulation(
@@ -83,7 +120,7 @@ void run_simulation(
 
 		std::lock_guard<std::mutex> lock(csv_mutex);
 		i_param++;
-		cli_progress_bar(i_param, n_params);
+		progress_update(i_param, n_params);
 		csv_file << ss.rdbuf(); // now write to file after obtaining global lock
 	}
 }
@@ -142,7 +179,7 @@ int main(int argc, const char** argv)
 	std::size_t i_param = 0, n_params = parameter_space.size();
 	{
 		std::lock_guard<std::mutex> lock(csv_mutex);
-		cli_progress_bar(i_param, n_params);
+		progress_update(i_param, n_params);
 	}
 	for(std::size_t i_thread = 0; i_thread < n_threads; i_thread++)
 	{
