@@ -6,6 +6,8 @@
 #include <boost/algorithm/string/classification.hpp>
 
 #include "preferentialAttachment/preferentialAttachment.hpp"
+#include "erdoesRenyi/erdoesRenyi.hpp"
+
 #include "../graph/graphHelper.h"
 #include "botAdding.h"
 
@@ -68,6 +70,18 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 			std::size_t m = std::stoul(param_strs[0]);
 			generate_preferential_attachment_directed(g, params.n_user, m, mt);
 		}
+		else if(method == "ErdoesRenyi")
+		{
+			if(param_strs.size() != 1)
+				throw FormatException("ErdoesRenyi model needs p parameter");
+			double p = std::stod(param_strs[0]);
+			if(params.is_directed)
+				generate_erdoes_renyi_directed(g, params.n_user, p, mt);
+			else
+				generate_erdoes_renyi_undirected(g, params.n_user, p, mt);
+		}
+		else
+			throw FormatException("Network model not recognized.");
 	}
 
 	// add bots to network
