@@ -90,7 +90,9 @@ int main(int argc, const char** argv)
 	{
 		const std::string csv_path = args["stationary-config-csv-output"].as<std::string>();
 
-		write_simulation_results_to_csv(csv_path, simulation_results, m);
+		std::ofstream csv_file(csv_path);
+		write_csv_header(csv_file,m);
+		write_simulation_results_to_csv(csv_file, simulation_results, m);
 	}
 
 	return 0;

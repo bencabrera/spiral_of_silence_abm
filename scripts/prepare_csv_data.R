@@ -11,7 +11,7 @@ basic_read_and_prepare_data <- function(path) {
 }
 
 add_m_column_for_network_model <- function(data) {
-	data$m <- as.integer(str_match(data$network_model, "BarabasiAlbert\\(([0-9]+)\\)")[,-1])	
+	data$m <- as.integer(str_match(data$network_model, "BA\\(([0-9]+)\\)")[,-1])	
 	return(data)
 }
 

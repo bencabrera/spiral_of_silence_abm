@@ -31,6 +31,7 @@ set (CPP_FILES
 	src/generation/generation.cpp
 	src/generation/generationParams.cpp
 	src/generation/botAdding.cpp
+	src/generation/helpers.cpp
 
 	src/simulation/performOneStep.cpp
 	src/simulation/simulateUntilStable.cpp
@@ -41,6 +42,7 @@ set (TEST_FILES
 	src/graph/tests/testGraphIo.cpp
 	src/model/tests/testModelIo.cpp
 	src/generation/tests/testGenerationParams.cpp
+	src/generation/tests/testHelpers.cpp
 	src/simulation/tests/testPerformOneStep.cpp
 )
 
