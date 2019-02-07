@@ -13,8 +13,8 @@ Model Model::read_from_gml(std::istream& istr)
 	// if undirected add edges in inverse direction
 	if(graph_attributes.count("directed") && graph_attributes["directed"] == "0")
 	{
-		add_inverse_edges(g);
-		set_increasing_indices(g);
+		add_inverse_edges(m.g);
+		set_increasing_indices(m.g);
 	}
 
 	const std::vector<std::string> mandatory_properties = {"valence", "expression_threshold", "inner_confidence"};
@@ -24,7 +24,7 @@ Model Model::read_from_gml(std::istream& istr)
 	}
 
 	m._valence = VertexPropertyMap<Valence>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
-	for (auto v : vertices(g)) {
+	for (auto v : vertices(m.g)) {
 		m._valence[v] = vertex_attributes["valence"][v] == "green" ? GREEN : RED;
 	}
 
@@ -36,7 +36,7 @@ Model Model::read_from_gml(std::istream& istr)
 	else
 	{
 		m._is_bot = VertexPropertyMap<bool>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
-		for (auto v : vertices(g)) {
+		for (auto v : vertices(m.g)) {
 			m._is_bot[v] = false;
 		}
 	}

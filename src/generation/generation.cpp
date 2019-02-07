@@ -15,7 +15,7 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	Model model;	
 
 	// build graph via network model
-	Graph g;
+	Graph& g = model.g;
 	{
 		auto [method,param_strs] = parse_method_call(params.network_model);
 		if(method == "BA")
@@ -66,7 +66,7 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	{
 		std::vector<Vertex> bots;
 		auto [method,param_strs] = parse_method_call(params.network_model);
-		if(method == "BarabasiAlbert")
+		if(method == "BA")
 		{
 			std::size_t m = 3;
 			if(param_strs.size() < 1)
@@ -82,7 +82,7 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 
 			bots = add_bots_via_barabasi_albert(g, m, params.n_bots, mt);
 		}
-		if(method == "Uniform")
+		else if(method == "Uniform")
 		{
 			std::size_t m = 1;
 			if(param_strs.size() > 0)
@@ -90,8 +90,10 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 
 			bots = add_bots_uniformly(g, params.n_bots, mt, m);
 		}
+		else 
+			throw FormatException("Bot attachment method not recognized.");
 
-		model._is_bot = VertexPropertyMap<bool>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
+		model._is_bot = VertexPropertyMap<bool>(boost::num_vertices(g), boost::get(boost::vertex_index, g));
 		for (auto v : vertices(g)) 
 			model._is_bot[v] = false;
 		for (auto v : bots) 
@@ -102,11 +104,9 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 		add_inverse_edges(g);
 	set_increasing_indices(g);
 
-	model.g = g;
-
 	// initialize expression thresholds
-	model._expression_threshold = VertexPropertyMap<double>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
-	for (auto v : vertices(model.g)) {
+	model._expression_threshold = VertexPropertyMap<double>(boost::num_vertices(g), boost::get(boost::vertex_index, g));
+	for (auto v : vertices(g)) {
 		if(model.is_bot(v))
 			model._expression_threshold[v] = 0.0;
 		else
@@ -114,14 +114,20 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	}
 
 	// initialize inner confidences
-	model._inner_confidence = VertexPropertyMap<double>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
-	for (auto v : vertices(model.g)) {
+	model._inner_confidence = VertexPropertyMap<double>(boost::num_vertices(g), boost::get(boost::vertex_index, g));
+	for (auto v : vertices(g)) {
 		model._inner_confidence[v] = draw_from_distribution(params.inner_confidence_init,mt);
 	}
 
-	model._valence = VertexPropertyMap<Valence>(boost::num_vertices(model.g), boost::get(boost::vertex_index, model.g));
+	model._valence = VertexPropertyMap<Valence>(boost::num_vertices(g), boost::get(boost::vertex_index, g));
 	std::uniform_real_distribution<double> unif_0_1(0,1);
-	for (auto v : vertices(model.g)) {
+	for (auto v : vertices(g)) {
+		if(model.is_bot(v))
+		{
+			model._valence[v] = RED;
+			continue;
+		}
+
 		if(unif_0_1(mt) < params.ratio_valence_green)
 			model._valence[v] = GREEN;
 		else

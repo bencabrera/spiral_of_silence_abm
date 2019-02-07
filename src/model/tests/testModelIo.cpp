@@ -113,6 +113,8 @@ TEST_CASE("Undirected graph should have edges in both directions","[io]")
 	auto& g = m.graph();
 
 	for (auto e : edges(g)) 
+	{
 		REQUIRE(boost::edge(boost::target(e,g),boost::source(e,g),g).second);
+	}
 }
 

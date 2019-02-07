@@ -43,6 +43,7 @@ set (TEST_FILES
 	src/model/tests/testModelIo.cpp
 	src/generation/tests/testGenerationParams.cpp
 	src/generation/tests/testHelpers.cpp
+	src/generation/tests/testGenerate.cpp
 	src/simulation/tests/testPerformOneStep.cpp
 )
 
