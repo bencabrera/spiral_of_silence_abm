@@ -32,8 +32,9 @@ SimulationResults simulate_until_stable(Model& m, double epsilon, std::function<
 	rtn.times_flipped = times_flipped;
 
 	// perception error
-	std::size_t n_green_speaking = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v); });
-	std::size_t n_red_speaking = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v); });
+	double n_green_speaking = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v); });
+	double n_red_speaking = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v); });
+
 	
 	double global_delta_for_green = (n_green_speaking - n_red_speaking) / (n_green_speaking + n_red_speaking);
 	double global_delta_for_red = (n_red_speaking - n_green_speaking) / (n_green_speaking + n_red_speaking);

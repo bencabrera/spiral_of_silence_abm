@@ -37,7 +37,7 @@ StepResults perform_one_step(Model& m, double epsilon)
 		}	
 	}
 
-	VertexPropertyMap<double> deltas(boost::num_vertices(g), boost::get(boost::vertex_index, g));
+	rtn.deltas = VertexPropertyMap<double>(boost::num_vertices(g), boost::get(boost::vertex_index, g));
 
 	// update confidence
 	for (auto v : vertices(g)) {
@@ -56,9 +56,9 @@ StepResults perform_one_step(Model& m, double epsilon)
 
 		double delta = 0;
 		if(n_supporter + n_opponents > 0)
-			delta = static_cast<double>(n_supporter - n_opponents) / (n_supporter + n_opponents);
+			delta = (n_supporter - n_opponents) / (n_supporter + n_opponents);
 
-		deltas[v] = delta;
+		rtn.deltas[v] = delta;
 
 		double old_confidence = m.confidence(v);
 
