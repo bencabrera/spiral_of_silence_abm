@@ -21,14 +21,36 @@
 #include "simulation/simulateUntilStable.h"
 #include "simulation/writeSimulationResultsToCsv.h"
 
-void run_simulation(std::ostream& csv_file, const std::vector<GenerationParams>& parameter_space, const std::size_t n_runs, std::mt19937 mt, std::mutex& mutex, const double epsilon = 1e-4)
+void cli_progress_bar(std::size_t i_progress, std::size_t n, std::string additional_msg = "", std::size_t bar_width = 80)
+{
+	double ratio = static_cast<double>(i_progress) / n;
+	double percentage = 100 * ratio;
+
+	std::cout << "[";
+	std::size_t pos = bar_width * ratio;
+	for (std::size_t i = 0; i < bar_width; ++i) {
+		if (i < pos) std::cout << "=";
+		else if (i == pos) std::cout << ">";
+		else std::cout << " ";
+	}
+	std::cout << "] ";
+
+	std::stringstream ss;
+
+	ss << std::setw(5) << std::fixed << std::setprecision(1) << percentage << " %";
+	std::cout << ss.str();
+	std::cout << " " << additional_msg;
+	std::cout << "\r"; // set carriage return
+	std::cout.flush();
+}
+
+void run_simulation(std::ostream& csv_file, const std::vector<GenerationParams>& parameter_space, const std::size_t n_runs, std::mt19937 mt, std::mutex& mutex, std::size_t& i_param, const std::size_t n_params, const double epsilon = 1e-4)
 {
 	for (auto params : parameter_space) 
 	{
 		std::stringstream ss; // first write all lines for one param config to stringstream
 		for(std::size_t i_run = 0; i_run < n_runs; i_run++)
 		{
-			std::cout << i_run << std::endl;
 			// generate model
 			auto m = generate(params,mt);
 
@@ -40,6 +62,8 @@ void run_simulation(std::ostream& csv_file, const std::vector<GenerationParams>&
 		}
 
 		std::lock_guard<std::mutex> lock(mutex);
+		i_param++;
+		cli_progress_bar(i_param, n_params);
 		csv_file << ss.rdbuf(); // now write to file after obtaining global lock
 	}
 }
@@ -106,9 +130,14 @@ int main(int argc, const char** argv)
 
 	std::vector<std::future<void>> futures;
 	std::mutex mutex;
+	std::size_t i_param = 0, n_params = parameter_space.size();
+	{
+		std::lock_guard<std::mutex> lock(mutex);
+		cli_progress_bar(i_param, n_params);
+	}
 	for(std::size_t i_thread = 0; i_thread < n_threads; i_thread++)
 	{
-		futures.push_back(std::async(std::launch::async, run_simulation, std::ref(csv_file), std::ref(thread_params[i_thread]), n_runs, mts[i_thread], std::ref(mutex), epsilon));
+		futures.push_back(std::async(std::launch::async, run_simulation, std::ref(csv_file), std::ref(thread_params[i_thread]), n_runs, mts[i_thread], std::ref(mutex), std::ref(i_param), n_params, epsilon));
 	}
 
 	for (auto& f : futures)
