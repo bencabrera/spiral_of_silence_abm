@@ -108,15 +108,9 @@ int main(int argc, const char** argv)
     std::ifstream input_param_space_file(input_param_space_path);
 	auto parameter_space = build_param_space_from_json(input_param_space_file);
 
-	// write header if file did not exist
-	std::ifstream csv_file_test(csv_path);
 	std::ofstream csv_file(csv_path);
-	if(!csv_file_test.good())
-	{
-		auto m = generate(parameter_space[0],mt);
-		write_csv_header(csv_file, m);
-	}
-	csv_file_test.close();
+	auto m = generate(parameter_space[0],mt);
+	write_csv_header(csv_file, m);
 
 	// split parameter space into n_threads equal parts
 	std::vector<std::vector<GenerationParams>> thread_params(n_threads);
