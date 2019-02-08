@@ -7,6 +7,9 @@ library(stringr)
 
 basic_read_and_prepare_data <- function(path) {
 	data <- fread(path)
+
+	data$most_central_valence <- ifelse(data$most_central_valence == 1, "red", "green")
+
 	return(data)
 }
 
