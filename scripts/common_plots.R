@@ -102,3 +102,52 @@ plot_central_node_influence_by_m <- function(data) {
 		theme_classic()
 	ggsave("central_node_influence_by_m.pdf",width=10,height=6.5)
 }
+
+# Win rate of red by bot attachment method
+plot_win_rate_by_bot_method <- function(data) {
+	data$red_wins <- ifelse(data$n_speaking_red > data$n_speaking_green, 1, 0)
+	data$percent_bots <- data$n_bots / data$n_users
+
+	data_small <- data[,c("m", "bot_attachment_method", "bot_influence", "percent_bots", "red_wins")]
+
+	tmp <- data_small[,.(win_probability=mean(red_wins)), by=list(m,bot_attachment_method,bot_influence,percent_bots)]
+
+	# IMPORTANT: here we restrict only to bot_influence == 1
+	tmp <- tmp[bot_influence==1]
+	tmp$m <- as.factor(tmp$m)
+
+	ggplot(tmp,aes(x=percent_bots, y=win_probability, linetype=m)) +
+		geom_smooth(se=TRUE, level = 0.95, colour = "#08519c", span = 0.75) +
+		geom_hline(yintercept = 0.5, linetype = "dashed", colour = "grey50") +
+		scale_x_continuous(name = "Bots added (%)", labels = function(x){x*100}) +
+		scale_y_continuous(name = "Probability bot opinion dominates (%)", labels = function(x){x*100}) +
+		facet_wrap(~bot_attachment_method, ncol = 3) +
+		#       labs(title="Influence of Bots to Win Rate with Bot Influence Factor") +
+		theme_classic()
+
+	ggsave("win_rate_by_bot_method.pdf", width=9, height=3, dpi=300)
+}
+
+# Win rate of red by bot influence
+plot_win_rate_by_bot_influence <- function(data) {
+	data$red_wins <- ifelse(data$n_speaking_red > data$n_speaking_green, 1, 0)
+	data$percent_bots <- data$n_bots / data$n_users
+
+	data_small <- data[,c("m", "bot_attachment_method", "bot_influence", "percent_bots", "red_wins")]
+
+	tmp <- data_small[,.(win_probability=mean(red_wins)), by=list(m,bot_attachment_method,bot_influence,percent_bots)]
+
+	tmp$m <- as.factor(tmp$m)
+	tmp <- tmp[bot_attachment_method=="BA"]
+	tmp <- tmp[bot_influence %in% c(0.25,0.5,0.75)]
+
+	ggplot(tmp,aes(x=percent_bots, y=win_probability, linetype=m)) +
+		geom_smooth(se=TRUE, level = 0.95, colour = "#08519c", span = 0.75) +
+		geom_hline(yintercept = 0.5, linetype = "dashed", colour = "grey50") +
+		scale_x_continuous(name = "Bots added (%)", labels = function(x){x*100}) +
+		scale_y_continuous(name = "Probability bot opinion dominates (%)", labels = function(x){x*100}) +
+		facet_wrap(~bot_influence, ncol = 3) +
+		theme_classic()
+
+	ggsave("win_rate_by_bot_influence.pdf", width=9, height=3, dpi=300)
+}
