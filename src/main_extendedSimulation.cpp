@@ -165,6 +165,8 @@ int main(int argc, const char** argv)
     std::ifstream input_param_space_file(input_param_space_path);
 	auto parameter_space = build_param_space_from_json(input_param_space_file);
 
+	std::cout << "Size of parameter space: " << parameter_space.size() << std::endl;
+
 	std::ofstream csv_file(csv_path);
 	auto m = generate(parameter_space[0],mt);
 	write_csv_header(csv_file, m);

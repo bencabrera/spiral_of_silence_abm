@@ -16,6 +16,8 @@ class GenerationParams {
 
 		bool is_directed = false;
 
+		double bot_influence = 1.0;
+
 		static GenerationParams parse_from_json(std::istream& istr);
 		static GenerationParams parse_from_json(nlohmann::json obj);
 		void write_to_json(std::ostream& ostr);

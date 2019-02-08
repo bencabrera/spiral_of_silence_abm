@@ -12,12 +12,12 @@ TEST_CASE("Param space should be build correctly", "[generation]")
 
 	REQUIRE(params.size() == 6);
 
-	REQUIRE(params[0].bot_attachment_method == "BarabasiAlbert(1)");
-	REQUIRE(params[1].bot_attachment_method == "BarabasiAlbert(1)");
-	REQUIRE(params[2].bot_attachment_method == "BarabasiAlbert(2)");
-	REQUIRE(params[3].bot_attachment_method == "BarabasiAlbert(2)");
-	REQUIRE(params[4].bot_attachment_method == "BarabasiAlbert(3)");
-	REQUIRE(params[5].bot_attachment_method == "BarabasiAlbert(3)");
+	REQUIRE(params[0].bot_attachment_method == "BA(1)");
+	REQUIRE(params[1].bot_attachment_method == "BA(1)");
+	REQUIRE(params[2].bot_attachment_method == "BA(2)");
+	REQUIRE(params[3].bot_attachment_method == "BA(2)");
+	REQUIRE(params[4].bot_attachment_method == "BA(3)");
+	REQUIRE(params[5].bot_attachment_method == "BA(3)");
 
 	REQUIRE(params[0].expression_threshold_init == "Unif(0,1)");
 	REQUIRE(params[1].expression_threshold_init == "Unif(0,2)");

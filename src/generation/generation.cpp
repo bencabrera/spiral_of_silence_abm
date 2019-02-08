@@ -66,29 +66,31 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	{
 		std::vector<Vertex> bots;
 		auto [method,param_strs] = parse_method_call(params.network_model);
+		
+		// get number of connections each bot should make
+		std::size_t m = 0;
+		if(param_strs.size() < 1)
+		{
+			auto [network_method,network_param_strs] = parse_method_call(params.network_model);
+			if(network_method == "BA" && network_param_strs.size() == 1)
+				m = std::stoul(network_param_strs[0]);
+			else
+				throw FormatException("Model for bot attachment needs m parameter and network model is not BA.");
+		}
+		else
+			m = std::stoul(param_strs[0]);
+
 		if(method == "BA")
 		{
-			std::size_t m = 3;
-			if(param_strs.size() < 1)
-			{
-				auto [network_method,network_param_strs] = parse_method_call(params.network_model);
-				if(network_method == "BarabasiAlbert" && network_param_strs.size() == 1)
-					m = std::stoul(network_param_strs[0]);
-				else
-					throw FormatException("BarabasiAlbert model for bot attachment needs m parameter and network model is not BarabasiAlbert.");
-			}
-			else
-				m = std::stoul(param_strs[0]);
-
 			bots = add_bots_via_barabasi_albert(g, m, params.n_bots, mt);
+		}
+		else if(method == "InverseBA")
+		{
+			bots = add_bots_via_inverse_barabasi_albert(g, m, params.n_bots, mt);
 		}
 		else if(method == "Uniform")
 		{
-			std::size_t m = 1;
-			if(param_strs.size() > 0)
-				m = std::stoul(param_strs[0]);
-
-			bots = add_bots_uniformly(g, params.n_bots, mt, m);
+			bots = add_bots_uniformly(g, m, params.n_bots, mt);
 		}
 		else 
 			throw FormatException("Bot attachment method not recognized.");
@@ -135,6 +137,8 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	}
 
 	model._is_directed = params.is_directed;
+
+	model._bot_influence = params.bot_influence;
 
 	// add some properties refering to how model was generated
 	model.global_properties["expression_threshold_init_method"] = params.expression_threshold_init;

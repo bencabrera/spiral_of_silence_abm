@@ -32,6 +32,8 @@ GenerationParams GenerationParams::parse_from_json(json obj)
 		params.is_directed = obj["is_directed"].get<bool>();
 	if(obj.count("ratio_valence_green"))
 		params.ratio_valence_green = obj["ratio_valence_green"].get<double>();
+	if(obj.count("bot_influence"))
+		params.bot_influence = obj["bot_influence"].get<double>();
 
 	return params;
 }
@@ -49,6 +51,7 @@ void GenerationParams::write_to_json(std::ostream& ostr)
 	obj["bot_attachment_method"] = bot_attachment_method;
 	obj["is_directed"] = is_directed;
 	obj["ratio_valence_green"] = ratio_valence_green;
+	obj["bot_influence"] = bot_influence;
 
 	ostr << obj;
 }
@@ -63,7 +66,7 @@ std::vector<GenerationParams> build_param_space_from_json(std::istream& istr)
 
 std::vector<GenerationParams> build_param_space_from_json(json obj)
 {
-	const std::vector<std::string> properties = {"n_user", "n_bots", "expression_threshold_init", "inner_confidence_init", "network_model", "bot_attachment_method", "is_directed", "ratio_valence_green"};
+	const std::vector<std::string> properties = {"n_user", "n_bots", "expression_threshold_init", "inner_confidence_init", "network_model", "bot_attachment_method", "is_directed", "ratio_valence_green", "bot_influence"};
 
 	// check that all properties are arrays
 	for (std::string p : properties) {
