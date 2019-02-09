@@ -2,7 +2,7 @@
 
 #include "../exceptions/formatException.h"
 
-#include "iterativeAttachment.h"
+#include "preferentialAttachment.h"
 #include "erdoesRenyi.h"
 #include "stochasticBlockModel.h"
 

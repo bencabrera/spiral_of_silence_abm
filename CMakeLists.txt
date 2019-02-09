@@ -33,7 +33,7 @@ set (CPP_FILES
 	src/generation/botAdding.cpp
 	src/generation/helpers.cpp
 
-	src/generation/iterativeAttachment.cpp
+	src/generation/preferentialAttachment.cpp
 	src/generation/erdoesRenyi.cpp
 	src/generation/stochasticBlockModel.cpp
 

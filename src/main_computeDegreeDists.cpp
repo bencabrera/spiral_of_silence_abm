@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "exceptions/argumentException.h"
-#include "generation/iterativeAttachment.h"
+#include "generation/preferentialAttachment.h"
 
 #include "graph/graphHelper.h"
 
@@ -36,18 +36,19 @@ int main(int argc, const char** argv)
 
 	std::ofstream csv_file(out_file_path);
 
-	csv_file << "model,n,p" << std::endl;
+	csv_file << "gamma,n,p" << std::endl;
 
 	std::random_device rd;
 	std::mt19937 mt(rd());
 
-	// preferential attachment
-	{
+	std::vector<double> gammas = {1.0,0.0,-1.0,-2.0};
+
+	for (auto gamma : gammas) {
 		std::vector<std::vector<std::size_t>> dists;
 		for(std::size_t i_run = 0; i_run < n_runs; i_run++)
 		{
 			Graph g;
-			generate_iterative_attachment_directed(g, n_vertices, m, 1.0, mt);
+			generate_iterative_attachment_directed(g, n_vertices, m, gamma, mt);
 
 			dists.push_back(compute_degree_distribution(g));
 		}
@@ -55,46 +56,6 @@ int main(int argc, const char** argv)
 		auto dist = avg_dist_from_runs(n_vertices,dists);
 
 		for(std::size_t n = 0; n < dist.size(); n++)
-		{
-			csv_file << "PA," << n << "," << dist[n] << std::endl;
-		}
-	}
-
-	// uniform attachment
-	{
-		std::vector<std::vector<std::size_t>> dists;
-		for(std::size_t i_run = 0; i_run < n_runs; i_run++)
-		{
-			Graph g;
-			generate_iterative_attachment_directed(g, n_vertices, m, 0.0, mt);
-
-			dists.push_back(compute_degree_distribution(g));
-		}
-
-		auto dist = avg_dist_from_runs(n_vertices,dists);
-
-		for(std::size_t n = 0; n < dist.size(); n++)
-		{
-			csv_file << "UA," << n << "," << dist[n] << std::endl;
-		}
-	}
-
-	// inverse preferential attachment
-	{
-		std::vector<std::vector<std::size_t>> dists;
-		for(std::size_t i_run = 0; i_run < n_runs; i_run++)
-		{
-			Graph g;
-			generate_iterative_attachment_directed(g, n_vertices, m, -1.0, mt);
-
-			dists.push_back(compute_degree_distribution(g));
-		}
-
-		auto dist = avg_dist_from_runs(n_vertices,dists);
-
-		for(std::size_t n = 0; n < dist.size(); n++)
-		{
-			csv_file << "IPA," << n << "," << dist[n] << std::endl;
-		}
+			csv_file << gamma << "," << n << "," << dist[n] << std::endl;
 	}
 }

@@ -13,8 +13,11 @@ basic_read_and_prepare_data <- function(path) {
 	return(data)
 }
 
-add_m_column_for_network_model <- function(data) {
-	data$m <- as.integer(str_match(data$network_model, "BA\\(([0-9]+)\\)")[,-1])	
+add_m_gamma_column_for_network_model <- function(data) {
+	extract <- str_match(data$network_model, "([0-9\\.]+),([-0-9\\.]+)")
+	data$m <- as.integer(extract[,2])	
+	data$gamma <- as.numeric(extract[,3])	
+	data$gamma <- as.factor(data$gamma)
 	return(data)
 }
 
