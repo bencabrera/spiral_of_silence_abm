@@ -20,3 +20,13 @@ void add_inverse_edges(Graph& g)
 			boost::add_edge(v2,v1,g);
 	}
 }
+
+std::vector<std::size_t> compute_degree_distribution(Graph& g)
+{
+	std::vector<std::size_t> dist(boost::num_vertices(g),0);
+
+	for (auto v : vertices(g)) 
+		dist[boost::degree(v,g)]++;
+	
+	return dist;
+}

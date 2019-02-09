@@ -2,9 +2,9 @@
 
 #include "../exceptions/formatException.h"
 
-#include "preferentialAttachment/preferentialAttachment.hpp"
-#include "erdoesRenyi/erdoesRenyi.hpp"
-#include "stochasticBlockModel/stochasticBlockModel.hpp"
+#include "iterativeAttachment.h"
+#include "erdoesRenyi.h"
+#include "stochasticBlockModel.h"
 
 #include "../graph/graphHelper.h"
 #include "botAdding.h"
@@ -18,14 +18,15 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	Graph& g = model.g;
 	{
 		auto [method,param_strs] = parse_method_call(params.network_model);
-		if(method == "BA")
+		if(method == "IterativeAttachment")
 		{
-			if(param_strs.size() != 1)
-				throw FormatException("BA model needs m parameter");
+			if(param_strs.size() != 2)
+				throw FormatException("IterativeAttachment model needs m and gamma parameter");
 			std::size_t m = std::stoul(param_strs[0]);
-			generate_preferential_attachment_directed(g, params.n_user, m, mt);
+			double gamma = std::stod(param_strs[1]);
+			generate_iterative_attachment_directed(g, params.n_user, m, gamma, mt);
 		}
-		else if(method == "ER")
+		else if(method == "ErdoesRenyi")
 		{
 			if(param_strs.size() != 1)
 				throw FormatException("ER model needs p parameter");
@@ -35,7 +36,7 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 			else
 				generate_erdoes_renyi_undirected(g, params.n_user, p, mt);
 		}
-		else if(method == "SBM")
+		else if(method == "StochasticBlockModel")
 		{
 			if(param_strs.size() != 2)
 				throw FormatException("Stochastic Block Model model needs 2 parameters: priors & connectivity matrix.");

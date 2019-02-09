@@ -1,9 +1,6 @@
-#pragma once
+#include "erdoesRenyi.h"
 
-#include <random>
 #include <boost/graph/random.hpp>
-
-#include "../../graph/graph.h"
 
 void generate_erdoes_renyi_undirected(Graph& g, const std::size_t n, const double p, std::mt19937& rand_gen)
 {

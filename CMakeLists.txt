@@ -33,6 +33,10 @@ set (CPP_FILES
 	src/generation/botAdding.cpp
 	src/generation/helpers.cpp
 
+	src/generation/iterativeAttachment.cpp
+	src/generation/erdoesRenyi.cpp
+	src/generation/stochasticBlockModel.cpp
+
 	src/simulation/performOneStep.cpp
 	src/simulation/simulateUntilStable.cpp
 	src/simulation/writeSimulationResultsToCsv.cpp
@@ -61,6 +65,10 @@ target_link_libraries(extended_simulation ${CMAKE_THREAD_LIBS_INIT})
 add_executable(generation src/main_generation.cpp ${CPP_FILES})
 target_link_libraries(generation fmt)
 target_link_libraries(generation ${Boost_LIBRARIES})
+
+add_executable(compute_degree_dists src/main_computeDegreeDists.cpp ${CPP_FILES})
+target_link_libraries(compute_degree_dists fmt)
+target_link_libraries(compute_degree_dists ${Boost_LIBRARIES})
 
 # tests
 add_executable(tests src/tests/main_tests.cpp ${TEST_FILES} ${CPP_FILES})
