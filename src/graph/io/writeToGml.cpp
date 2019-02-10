@@ -32,7 +32,7 @@ void write_to_gml(std::ostream& ostr, const Graph& g, std::map<std::string, Vert
 	ostr << "graph [" << std::endl;
 
 	for (auto [k,v] : graph_labels) {
-		ostr << INDENT << k << " " << v << std::endl;	
+		ostr << INDENT << k << " \"" << v << "\"" << std::endl;	
 	}
 
 	for(auto v : vertices(g))

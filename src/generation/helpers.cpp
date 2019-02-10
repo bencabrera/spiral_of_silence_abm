@@ -8,7 +8,7 @@
 std::pair<std::string, std::vector<std::string>> parse_method_call(std::string str)
 {
 	std::size_t pos_opening_parenthesis = str.find_first_of('(');
-	std::size_t pos_closing_parenthesis = str.find_first_of(')');
+	std::size_t pos_closing_parenthesis = str.find_last_of(')');
 
 	// if no parameter specified -> return method name and empty parameter set
 	if(pos_opening_parenthesis == std::string::npos || pos_closing_parenthesis == std::string::npos)
@@ -24,9 +24,9 @@ std::pair<std::string, std::vector<std::string>> parse_method_call(std::string s
 	{
 		if(params_str[i] == ',' && bracket_depth == 0)
 			commas.push_back(i);
-		if(params_str[i] == '[')
+		if(params_str[i] == '[' || params_str[i] == '(')
 			bracket_depth++;
-		if(params_str[i] == ']')
+		if(params_str[i] == ']' || params_str[i] == ')')
 			bracket_depth--;
 	}
 

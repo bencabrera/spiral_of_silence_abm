@@ -32,10 +32,12 @@ set (CPP_FILES
 	src/generation/generationParams.cpp
 	src/generation/botAdding.cpp
 	src/generation/helpers.cpp
+	src/generation/graphGeneration.cpp
 
 	src/generation/preferentialAttachment.cpp
 	src/generation/erdoesRenyi.cpp
 	src/generation/stochasticBlockModel.cpp
+	src/generation/generalStochasticBlockModel.cpp
 
 	src/simulation/performOneStep.cpp
 	src/simulation/simulateUntilStable.cpp
