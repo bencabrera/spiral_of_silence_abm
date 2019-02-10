@@ -21,6 +21,12 @@ add_m_gamma_column_for_network_model <- function(data) {
 	return(data)
 }
 
+add_inter_cluster_density_for_sbm <- function(data) {
+	extract <- str_match(data$network_model, "([0-9\\.]+)\\)$")
+	data$inter_cluster_density <- as.numeric(extract[,2])
+	return(data)
+}
+
 # # convert results to correct format: transport, unlist each column, make data frame
 # bot_simulation_results <- data.frame(apply(t(bot_simulation_results), 2, unlist))
 # bot_simulation_results$m <- as.factor(bot_simulation_results$m)

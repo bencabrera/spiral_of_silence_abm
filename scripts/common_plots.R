@@ -227,3 +227,19 @@ plot_win_rate_by_bot_influence <- function(data) {
 
 	ggsave("win_rate_by_bot_influence.pdf", width=9, height=3, dpi=300)
 }
+
+
+# --- SBM ---
+
+# Distance between cluster winners by inter cluster density
+plot_cluster_winners_by_inter_cluster_density <- function(data) {
+	data$cluster_winner_distance <- abs(data$n_cluster_green_dominates-data$n_cluster_red_dominates)
+	data_small <- data[,.(mean_cluster_winner_distance=mean(cluster_winner_distance)),by=inter_cluster_density]
+	ggplot(data_small,aes(x = inter_cluster_density, y = mean_cluster_winner_distance)) +
+		geom_line() +
+		# scale_y_continuous(name = "Ticks until stable",limits=c(0,50)) +
+		# scale_x_continuous() +
+		theme_bw()
+
+	ggsave("cluster_winners_by_inter_cluster_density.pdf",width=10,height=6.5)
+}

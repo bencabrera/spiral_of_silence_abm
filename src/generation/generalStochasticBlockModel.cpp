@@ -55,5 +55,10 @@ std::vector<std::size_t> generate_general_stochastic_block_model_undirected(Grap
 		}
 	}
 
-	return cluster_sizes;
+	std::vector<std::size_t> vertex_cluster;
+	for(std::size_t i_cluster = 0; i_cluster < cluster_sizes.size(); i_cluster++)
+		for(std::size_t j = 0; j < cluster_sizes[i_cluster]; j++)
+			vertex_cluster.push_back(i_cluster);
+
+	return vertex_cluster;
 }

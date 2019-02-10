@@ -7,8 +7,22 @@
 #include "../exceptions/formatException.h"
 #include "helpers.h"
 
-void graph_generation(Graph& g, const GenerationParams params, std::mt19937& mt)
+namespace {
+	std::vector<std::size_t> all_vertices_same_cluster(const Graph& g)
+	{
+		std::vector<std::size_t> rtn;
+
+		for(std::size_t v = 0; v < boost::num_vertices(g); v++)
+			rtn.push_back(0);
+
+		return rtn;
+	}
+}
+
+GraphGenerationResults graph_generation(Graph& g, const GenerationParams params, std::mt19937& mt)
 {
+	GraphGenerationResults rtn;
+
 	auto [method,param_strs] = parse_method_call(params.network_model);
 	if(method == "IterativeAttachment")
 	{
@@ -17,6 +31,8 @@ void graph_generation(Graph& g, const GenerationParams params, std::mt19937& mt)
 		std::size_t m = std::stoul(param_strs[0]);
 		double gamma = std::stod(param_strs[1]);
 		generate_iterative_attachment_directed(g, params.n_user, m, gamma, mt);
+
+		rtn.vertex_cluster = all_vertices_same_cluster(g);
 	}
 	else if(method == "ErdoesRenyi")
 	{
@@ -27,6 +43,8 @@ void graph_generation(Graph& g, const GenerationParams params, std::mt19937& mt)
 			generate_erdoes_renyi_directed(g, params.n_user, p, mt);
 		else
 			generate_erdoes_renyi_undirected(g, params.n_user, p, mt);
+
+		rtn.vertex_cluster = all_vertices_same_cluster(g);
 	}
 	else if(method == "StochasticBlockModel")
 	{
@@ -49,6 +67,8 @@ void graph_generation(Graph& g, const GenerationParams params, std::mt19937& mt)
 			generate_stochastic_block_model_directed(g, params.n_user, priors, matrix, mt);
 		else
 			generate_stochastic_block_model_undirected(g, params.n_user, priors, matrix, mt);
+
+		rtn.vertex_cluster = all_vertices_same_cluster(g); // TODO: this is wrong
 	}
 	else if(method == "GeneralStochasticBlockModel")
 	{
@@ -64,8 +84,11 @@ void graph_generation(Graph& g, const GenerationParams params, std::mt19937& mt)
 
 		auto p = std::stod(param_strs[2]);
 
-		generate_general_stochastic_block_model_undirected(g, params.n_user, priors, p, network_model, mt);
+		rtn.vertex_cluster = generate_general_stochastic_block_model_undirected(g, params.n_user, priors, p, network_model, mt);
 	}
 	else
 		throw FormatException("Network model not recognized.");
+
+	assert(rtn.vertex_cluster.size() == boost::num_vertices(g));
+	return rtn;
 }

@@ -41,6 +41,21 @@ Model Model::read_from_gml(std::istream& istr)
 		}
 	}
 
+	if(vertex_attributes.count("cluster"))
+		m._vertex_cluster = convert<std::string,std::size_t>(g,vertex_attributes["cluster"]);
+	else
+	{
+		m._vertex_cluster = VertexPropertyMap<std::size_t>(boost::num_vertices(m.g), boost::get(boost::vertex_index, m.g));
+		for (auto v : vertices(m.g)) {
+			m._vertex_cluster[v] = 0;
+		}
+	}
+
+	if(graph_attributes.count("n_clusters"))
+	{
+		m._n_clusters = std::stod(graph_attributes["n_clusters"]);
+		graph_attributes.erase("n_clusters");
+	}
 	if(graph_attributes.count("bot_influence"))
 	{
 		m._bot_influence = std::stod(graph_attributes["bot_influence"]);
@@ -68,6 +83,7 @@ void Model::write_to_gml(std::ostream& ostr)
 	std::map<std::string, VertexPropertyMap<std::string>> edge_attributes;
 	std::map<std::string, std::string> graph_attributes;
 
+	vertex_attributes["cluster"] = convert<std::size_t,std::string>(g,_vertex_cluster);
 	vertex_attributes["is_bot"] = convert<bool,std::string>(g,_is_bot);
 	vertex_attributes["inner_confidence"] = convert<double,std::string>(g,_inner_confidence);
 	vertex_attributes["expression_threshold"] = convert<double,std::string>(g,_expression_threshold);
@@ -82,6 +98,7 @@ void Model::write_to_gml(std::ostream& ostr)
 	graph_attributes["directed"] = _is_directed ? "1" : "0";
 	graph_attributes["bot_influence"] = std::to_string(_bot_influence);
 	graph_attributes["alpha"] = std::to_string(_alpha);
+	graph_attributes["n_clusters"] = std::to_string(_n_clusters);
 
 	::write_to_gml(ostr, g, vertex_attributes, {}, graph_attributes);
 }

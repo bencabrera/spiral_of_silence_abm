@@ -13,7 +13,16 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 
 	// build graph via network model
 	auto& g = model.g;
-	graph_generation(model.g, params, mt);
+	auto res = graph_generation(g, params, mt);
+
+	// assign clusters
+	model._vertex_cluster = VertexPropertyMap<std::size_t>(boost::num_vertices(g), boost::get(boost::vertex_index, g));
+	std::size_t max_cluster = 0;
+	for (auto v : vertices(g)) {
+		model._vertex_cluster[v] = res.vertex_cluster[v];
+		max_cluster = std::max(max_cluster, res.vertex_cluster[v]);
+	}
+	model._n_clusters = max_cluster+1;
 
 	// add bots to network
 	if(params.n_bots > 0)

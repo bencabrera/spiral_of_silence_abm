@@ -14,4 +14,17 @@ std::size_t count_vertices_with_predicate(const Model& m, Pred f)
 	return n;
 }
 
+template<typename Pred>
+std::vector<std::size_t> count_vertices_with_predicate_by_clusters(const Model& m, Pred f)
+{
+	std::vector<std::size_t> count_by_cluster(m.n_clusters(), 0);
+
+	for (auto v : vertices(m.graph())) {
+		if(f(v,m))
+			count_by_cluster[m.cluster(v)]++;
+	}
+
+	return count_by_cluster;
+}
+
 Vertex most_central_vertex(const Model& m);

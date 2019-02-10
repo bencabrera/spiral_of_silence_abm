@@ -21,6 +21,7 @@ class Model
 		double _bot_influence = 1.0;
 		double _alpha = 1.0;
 		bool _is_directed = false;
+		std::size_t _n_clusters;
 
 		// global non-interpreted model properties found in .gml file
 
@@ -29,6 +30,7 @@ class Model
 		VertexPropertyMap<double> _expression_threshold;
 		VertexPropertyMap<double> _inner_confidence;
 		VertexPropertyMap<bool> _is_bot;
+		VertexPropertyMap<std::size_t> _vertex_cluster;
 
 	public:
 		std::map<std::string,std::string> global_properties;
@@ -39,6 +41,10 @@ class Model
 			return g;
 		}
 
+		inline std::size_t n_clusters() const
+		{
+			return _n_clusters;
+		}
 		inline double bot_influence() const
 		{
 			return _bot_influence;
@@ -46,6 +52,11 @@ class Model
 		inline double alpha() const
 		{
 			return _alpha;
+		}
+
+		inline std::size_t cluster(Vertex v) const
+		{
+			return _vertex_cluster[v];
 		}
 
 		inline Valence valence(Vertex v) const
@@ -108,5 +119,6 @@ class Model
 		void write_to_gml(std::ostream& ostr);
 
 		friend Model generate(GenerationParams,std::mt19937&);
+		friend void graph_generation(Model& m, const GenerationParams params, std::mt19937& mt);
 };
 

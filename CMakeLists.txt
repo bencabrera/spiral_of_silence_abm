@@ -44,6 +44,8 @@ set (CPP_FILES
 	src/simulation/writeSimulationResultsToCsv.cpp
 )
 
+add_library(All STATIC ${CPP_FILES})
+
 set (TEST_FILES
 	src/graph/tests/testGraphIo.cpp
 	src/model/tests/testModelIo.cpp
@@ -54,26 +56,31 @@ set (TEST_FILES
 )
 
 # programs
-add_executable(simulation src/main_simulation.cpp ${CPP_FILES})
+add_executable(simulation src/main_simulation.cpp)
+target_link_libraries(simulation All)
 target_link_libraries(simulation fmt)
 target_link_libraries(simulation ${Boost_LIBRARIES})
 
-add_executable(extended_simulation src/main_extendedSimulation.cpp ${CPP_FILES})
+add_executable(extended_simulation src/main_extendedSimulation.cpp)
+target_link_libraries(extended_simulation All)
 target_link_libraries(extended_simulation fmt)
 target_link_libraries(extended_simulation ${Boost_LIBRARIES})
 target_link_libraries(extended_simulation ${Boost_LIBRARIES})
 target_link_libraries(extended_simulation ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(generation src/main_generation.cpp ${CPP_FILES})
+add_executable(generation src/main_generation.cpp)
+target_link_libraries(generation All)
 target_link_libraries(generation fmt)
 target_link_libraries(generation ${Boost_LIBRARIES})
 
-add_executable(compute_degree_dists src/main_computeDegreeDists.cpp ${CPP_FILES})
+add_executable(compute_degree_dists src/main_computeDegreeDists.cpp)
+target_link_libraries(compute_degree_dists All)
 target_link_libraries(compute_degree_dists fmt)
 target_link_libraries(compute_degree_dists ${Boost_LIBRARIES})
 
 # tests
-add_executable(tests src/tests/main_tests.cpp ${TEST_FILES} ${CPP_FILES})
+add_executable(tests src/tests/main_tests.cpp ${TEST_FILES})
+target_link_libraries(tests All)
 target_link_libraries(tests fmt)
 target_link_libraries(tests ${Boost_LIBRARIES})
 target_compile_definitions(tests PRIVATE TEST_MODELS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/models/")
