@@ -20,7 +20,7 @@ std::vector<std::size_t> count_vertices_with_predicate_by_clusters(const Model& 
 	std::vector<std::size_t> count_by_cluster(m.n_clusters(), 0);
 
 	for (auto v : vertices(m.graph())) {
-		if(f(v,m))
+		if(f(v,m) && m.cluster(v) != BOT_CLUSTER_INDEX)
 			count_by_cluster[m.cluster(v)]++;
 	}
 

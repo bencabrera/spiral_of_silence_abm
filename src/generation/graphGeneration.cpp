@@ -24,10 +24,10 @@ GraphGenerationResults graph_generation(Graph& g, const GenerationParams params,
 	GraphGenerationResults rtn;
 
 	auto [method,param_strs] = parse_method_call(params.network_model);
-	if(method == "IterativeAttachment")
+	if(method == "PreferentialAttachment")
 	{
 		if(param_strs.size() != 2)
-			throw FormatException("IterativeAttachment model needs m and gamma parameter");
+			throw FormatException("PreferentialAttachment model needs m and gamma parameter");
 		std::size_t m = std::stoul(param_strs[0]);
 		double gamma = std::stod(param_strs[1]);
 		generate_iterative_attachment_directed(g, params.n_user, m, gamma, mt);

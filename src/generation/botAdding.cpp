@@ -30,27 +30,11 @@ namespace {
 	}
 }
 
-std::vector<Vertex> add_bots_via_barabasi_albert(Graph& g, std::size_t m, std::size_t n_bots, std::mt19937& mt)
+std::vector<Vertex> add_bots_via_preferential_attachment(Graph& g, std::size_t m, double gamma, std::size_t n_bots, std::mt19937& mt)
 {
-	std::vector<double> degrees;
+	std::vector<double> weights;
 	for (auto v : vertices(g))
-		degrees.push_back(boost::degree(v,g));
+		weights.push_back(std::pow(boost::degree(v,g),gamma));
 
-	return add_bots_proportional_to_weights(g, m, n_bots, degrees, mt);
-}
-
-std::vector<Vertex> add_bots_via_inverse_barabasi_albert(Graph& g, std::size_t m, std::size_t n_bots, std::mt19937& mt)
-{
-	std::vector<double> inverse_degrees;
-	for (auto v : vertices(g))
-		inverse_degrees.push_back(1.0 / boost::degree(v,g));
-
-	return add_bots_proportional_to_weights(g, m, n_bots, inverse_degrees, mt);
-}
-
-std::vector<Vertex> add_bots_uniformly(Graph& g, std::size_t m, std::size_t n_bots, std::mt19937& mt)
-{
-	std::vector<double> unif_weights(boost::num_vertices(g), 1.0);
-
-	return add_bots_proportional_to_weights(g, m, n_bots, unif_weights, mt);
+	return add_bots_proportional_to_weights(g, m, n_bots, weights, mt);
 }

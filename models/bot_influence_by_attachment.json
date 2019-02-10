@@ -1,0 +1,25 @@
+{
+    "bot_attachment_method": [
+		"PreferentialAttachment(1,1)",
+		"PreferentialAttachment(1,0)",
+		"PreferentialAttachment(1,-2)",
+		"PreferentialAttachment(3,1)",
+		"PreferentialAttachment(3,0)",
+		"PreferentialAttachment(3,-2)",
+		"PreferentialAttachment(5,1)",
+		"PreferentialAttachment(5,0)",
+		"PreferentialAttachment(5,-2)"
+	],
+	"bot_influence": [0.25,0.5,0.75,1.0],
+    "expression_threshold_init": ["Unif(0,1)"],
+    "inner_confidence_init": ["Unif(0,1)"],
+    "is_directed": [false],
+    "n_bots": [0,10,20,30,40,50,60,70,80,90,100],
+    "n_user": [1000],
+    "network_model": [
+		"PreferentialAttachment(1,1)",
+		"PreferentialAttachment(5,1)",
+		"PreferentialAttachment(10,1)"
+	],
+    "ratio_valence_green": [0.5]
+}

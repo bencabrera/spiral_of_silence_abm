@@ -122,7 +122,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 				n_cluster_red_dominates++;
 		}
 
-		csv_file << n_cluster_green_dominates << "," << n_cluster_red_dominates;
+		csv_file << n_cluster_green_dominates << "," << n_cluster_red_dominates << ",";
 
 		// n_speaking_green_by_cluster
 		auto n_speaking_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v); });

@@ -1,0 +1,22 @@
+{
+    "bot_attachment_method": ["PreferentialAttachment"],
+    "expression_threshold_init": ["Unif(0,1)"],
+    "inner_confidence_init": ["Unif(0,1)"],
+    "is_directed": [false],
+    "n_bots": [0],
+    "n_user": [1000],
+    "network_model": [
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.05)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.10)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.15)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.20)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.25)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.30)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.35)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.40)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.45)",
+    	"GeneralStochasticBlockModel(PreferentialAttachment(3,-2),[0.5,0.5],0.50)"
+	],
+    "ratio_valence_green": [0.5],
+	"bot_influence": [1.0]
+}

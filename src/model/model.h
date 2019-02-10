@@ -7,6 +7,8 @@
 
 class GenerationParams;
 
+constexpr std::size_t BOT_CLUSTER_INDEX = 100000;
+
 enum Valence {
 	GREEN,
 	RED

@@ -25,35 +25,35 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	model._n_clusters = max_cluster+1;
 
 	// add bots to network
+	std::vector<Vertex> bots;
 	if(params.n_bots > 0)
 	{
-		std::vector<Vertex> bots;
 		auto [method,param_strs] = parse_method_call(params.network_model);
 		
 		// get number of connections each bot should make
 		std::size_t m = 0;
-		if(param_strs.size() < 1)
+		double gamma = 1;
+		if(param_strs.size() < 2)
 		{
+			// use same params as PreferentialAttachment
 			auto [network_method,network_param_strs] = parse_method_call(params.network_model);
-			if(network_method == "BA" && network_param_strs.size() == 1)
+			if(network_method == "PreferentialAttachment" && network_param_strs.size() == 2)
+			{
 				m = std::stoul(network_param_strs[0]);
+				gamma = std::stod(network_param_strs[1]);
+			}
 			else
-				throw FormatException("Model for bot attachment needs m parameter and network model is not BA.");
+				throw FormatException("Model for bot attachment needs m and gamma parameter and network model is not PreferentialAttachment.");
 		}
-		else
+		else 
+		{
 			m = std::stoul(param_strs[0]);
+			gamma = std::stod(param_strs[1]);
+		}
 
-		if(method == "BA")
+		if(method == "PreferentialAttachment")
 		{
-			bots = add_bots_via_barabasi_albert(g, m, params.n_bots, mt);
-		}
-		else if(method == "InverseBA")
-		{
-			bots = add_bots_via_inverse_barabasi_albert(g, m, params.n_bots, mt);
-		}
-		else if(method == "Uniform")
-		{
-			bots = add_bots_uniformly(g, m, params.n_bots, mt);
+			bots = add_bots_via_preferential_attachment(g, m, gamma, params.n_bots, mt);
 		}
 		else 
 			throw FormatException("Bot attachment method not recognized.");
@@ -62,7 +62,10 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 		for (auto v : vertices(g)) 
 			model._is_bot[v] = false;
 		for (auto v : bots) 
+		{
 			model._is_bot[v] = true;
+			model._vertex_cluster[v] = BOT_CLUSTER_INDEX;
+		}
 	}
 
 	if(!params.is_directed)
