@@ -243,3 +243,25 @@ plot_cluster_winners_by_inter_cluster_density <- function(data) {
 
 	ggsave("cluster_winners_by_inter_cluster_density.pdf",width=10,height=6.5)
 }
+
+
+plot_probability_to_win_by_how_many_central <- function(data) {
+	data_small <- data[,.(m,gamma,n_speaking_green,n_speaking_red,n_top_degree_green,n_top_degree_red)]
+
+	data_small$green_wins <- ifelse(data_small$n_speaking_green > data_small$n_speaking_red, 1, 0)
+
+	# return(data_small)
+
+	# compute mean grouped over all values of n_top_degree_green -> gives probability for green to win based on n_top_degree_green
+	tmp <- data_small[,.(p_green_wins=mean(green_wins)),by=.(m,gamma,n_top_degree_green)]
+	tmp <- tmp[m==5]
+
+	tmp$n_top_degree_green <- as.integer(tmp$n_top_degree_green)
+
+	ggplot(tmp,aes(x = n_top_degree_green, y = p_green_wins)) +
+		geom_point() +
+		geom_smooth() +
+		theme_bw() +
+		facet_wrap(~gamma)
+	ggsave("probability_to_win_by_how_many_central.pdf",width=8,height=3)
+}

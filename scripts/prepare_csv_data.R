@@ -27,6 +27,11 @@ add_inter_cluster_density_for_sbm <- function(data) {
 	return(data)
 }
 
+add_n_communities_for_sbm <- function(data) {
+	data$n_communities <- unlist(lapply(data$n_speaking_green_by_cluster, function(x) { length(tstrsplit(x,",")) }))
+	return(data)
+}
+
 # # convert results to correct format: transport, unlist each column, make data frame
 # bot_simulation_results <- data.frame(apply(t(bot_simulation_results), 2, unlist))
 # bot_simulation_results$m <- as.factor(bot_simulation_results$m)

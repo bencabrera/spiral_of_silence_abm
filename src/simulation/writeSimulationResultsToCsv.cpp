@@ -11,7 +11,9 @@ void write_csv_header(std::ostream& csv_file, const Model& m)
 	csv_file << "percent_0_color_flips, percent_1_color_flips, percent_2_color_flips, percent_more_color_flips,";
 	csv_file << "percent_accuracy_below_50, percent_accuracy_50_to_60, percent_accuracy_60_to_70, percent_accuracy_70_to_80, percent_accuracy_80_to_90, percent_accuracy_above_90,";
 	csv_file << "n_cluster_green_dominates,n_cluster_red_dominates,";
-	csv_file << "n_speaking_green_by_cluster,n_speaking_red_by_cluster,n_silenced_green_by_cluster,n_silenced_red_by_cluster";
+	csv_file << "n_speaking_green_by_cluster,n_speaking_red_by_cluster,n_silenced_green_by_cluster,n_silenced_red_by_cluster,";
+	csv_file << "avg_degree_green,avg_degree_red,";
+	csv_file << "n_top_degree_green,n_top_degree_red";
 	csv_file << std::endl;
 }
 
@@ -106,7 +108,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		csv_file << n_speaking_green << ",";
 		csv_file << n_speaking_red << ",";
 		csv_file << n_silenced_green << ",";
-		csv_file << n_silenced_red;
+		csv_file << n_silenced_red << ",";
 	}
 	else
 	{
@@ -154,8 +156,20 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		csv_file << n_silenced_red_by_cluster[0];
 		for (std::size_t i = 1; i < n_silenced_red_by_cluster.size(); i++) 
 			csv_file << "," << n_silenced_red_by_cluster[i];
-		csv_file << "\"";
+		csv_file << "\",";
 	}
+
+	// avg_degree_green
+	auto avg_degree_green = average_degree_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN; });
+	csv_file << avg_degree_green << ",";
+
+	// avg_degree_red
+	auto avg_degree_red = average_degree_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED; });
+	csv_file << avg_degree_red << ",";
+
+	// n_top_degree_green & n_top_degree_red
+	auto n_top_degree_color = count_colors_in_top_degrees(m, 0.01);
+	csv_file << n_top_degree_color.first << "," << n_top_degree_color.second << "";
 
 	csv_file << std::endl;
 }
