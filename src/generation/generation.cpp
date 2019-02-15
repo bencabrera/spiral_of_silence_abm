@@ -28,33 +28,31 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	std::vector<Vertex> bots;
 	if(params.n_bots > 0)
 	{
-		auto [method,param_strs] = parse_method_call(params.network_model);
+		auto [method,param_strs] = parse_method_call(params.bot_attachment_method);
 		
 		// get number of connections each bot should make
-		std::size_t m = 0;
-		double gamma = 1;
+		std::size_t m_bots = 0;
+		double gamma_bots = 1;
 		if(param_strs.size() < 2)
 		{
 			// use same params as PreferentialAttachment
 			auto [network_method,network_param_strs] = parse_method_call(params.network_model);
 			if(network_method == "PreferentialAttachment" && network_param_strs.size() == 2)
 			{
-				m = std::stoul(network_param_strs[0]);
-				gamma = std::stod(network_param_strs[1]);
+				m_bots = std::stoul(network_param_strs[0]);
+				gamma_bots = std::stod(network_param_strs[1]);
 			}
 			else
 				throw FormatException("Model for bot attachment needs m and gamma parameter and network model is not PreferentialAttachment.");
 		}
 		else 
 		{
-			m = std::stoul(param_strs[0]);
-			gamma = std::stod(param_strs[1]);
+			m_bots = std::stoul(param_strs[0]);
+			gamma_bots = std::stod(param_strs[1]);
 		}
 
 		if(method == "PreferentialAttachment")
-		{
-			bots = add_bots_via_preferential_attachment(g, m, gamma, params.n_bots, mt);
-		}
+			bots = add_bots_via_preferential_attachment(g, m_bots, gamma_bots, params.n_bots, mt);
 		else 
 			throw FormatException("Bot attachment method not recognized.");
 
