@@ -6,6 +6,14 @@ library(data.table)
 library(plyr)
 library(dplyr)
 
+# compute mean accuracy by and and gamma
+compute_mean_accuracy_by_m_gamma <- function(data) {
+	data_small <- data[,.(avg_accuracy,m,gamma)]
+	tmp <- data_small[,.(mean_accuracy=mean(avg_accuracy)),by=.(m,gamma)]
+
+	return(tmp)
+}
+
 # Ticks until stable by m
 plot_ticks_until_stable_by_m <- function(data) {
 	ggplot(data,aes(x = m, y = ticks_until_stable, group=m)) +

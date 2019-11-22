@@ -25,6 +25,9 @@ SimulationResults simulate_until_stable(Model& m, double epsilon, std::function<
 			times_flipped[v]++;
 
 		rtn.ticks_until_stable++;
+		
+		if(rtn.ticks_until_stable > 100000)
+			break;
 	}
 	while(step_results.n_humans_not_changed_confidence != 0);
 

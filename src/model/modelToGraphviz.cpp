@@ -36,13 +36,13 @@ namespace {
 					out << ",label=\"" << label << "\"";
 
 				if(_m.is_silenced(v))
-					out << ",fillcolor=gray";
+					out << ",fillcolor=\"#f7f7f7\"";
 				else 
 				{
 					if(_m.valence(v) == GREEN)
-						out << ",fillcolor=green";
+						out << ",fillcolor=\"#67a9cf\"";
 					if(_m.valence(v) == RED)
-						out << ",fillcolor=red";
+						out << ",fillcolor=\"#ef8a62\"";
 				}
 
 				out << "]";

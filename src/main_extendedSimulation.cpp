@@ -82,6 +82,7 @@ void progress_update(std::size_t i_progress, std::size_t n)
 }
 
 void run_simulation(
+	std::size_t i_thread,
 	std::ostream& csv_file, 
 	std::vector<GenerationParams>& parameter_space, 
 	const std::size_t n_runs, 
@@ -111,11 +112,22 @@ void run_simulation(
 			// generate model
 			auto m = generate(params,mt);
 
+			// // print params
+			// {
+				// std::ofstream f(std::string("model_") + std::to_string(i_thread) + ".gml");
+				// params.write_to_json(f);
+				// m.write_to_gml(f);
+			// }
+
 			// simulate
 			auto simulation_results = simulate_until_stable(m, epsilon);
 
 			// write simulatio results to csv
 			write_simulation_results_to_csv(ss, simulation_results, m);
+			// {
+				// std::ofstream f(std::string("model_") + std::to_string(i_thread) + ".gml");
+				// f << "empty";
+			// }
 		}
 
 		std::lock_guard<std::mutex> lock(csv_mutex);
@@ -185,7 +197,7 @@ int main(int argc, const char** argv)
 	}
 	for(std::size_t i_thread = 0; i_thread < n_threads; i_thread++)
 	{
-		futures.push_back(std::async(std::launch::async, run_simulation, std::ref(csv_file), std::ref(parameter_space), n_runs, mts[i_thread], std::ref(csv_mutex), std::ref(param_mutex), std::ref(i_param), n_params, epsilon));
+		futures.push_back(std::async(std::launch::async, run_simulation, i_thread, std::ref(csv_file), std::ref(parameter_space), n_runs, mts[i_thread], std::ref(csv_mutex), std::ref(param_mutex), std::ref(i_param), n_params, epsilon));
 	}
 
 	for (auto& f : futures)

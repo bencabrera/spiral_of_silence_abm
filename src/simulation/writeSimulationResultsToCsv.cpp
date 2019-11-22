@@ -9,7 +9,7 @@ void write_csv_header(std::ostream& csv_file, const Model& m)
 	csv_file << "n_individuals, n_users, n_bots, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red,";
 	csv_file << "ticks_until_stable, most_central_valence, most_central_silenced_start, most_central_silenced_end,";
 	csv_file << "percent_0_color_flips, percent_1_color_flips, percent_2_color_flips, percent_more_color_flips,";
-	csv_file << "percent_accuracy_below_50, percent_accuracy_50_to_60, percent_accuracy_60_to_70, percent_accuracy_70_to_80, percent_accuracy_80_to_90, percent_accuracy_above_90,";
+	csv_file << "percent_accuracy_below_50, percent_accuracy_50_to_60, percent_accuracy_60_to_70, percent_accuracy_70_to_80, percent_accuracy_80_to_90, percent_accuracy_above_90,avg_accuracy,";
 	csv_file << "n_cluster_green_dominates,n_cluster_red_dominates,";
 	csv_file << "n_speaking_green_by_cluster,n_speaking_red_by_cluster,n_silenced_green_by_cluster,n_silenced_red_by_cluster,";
 	csv_file << "avg_degree_green,avg_degree_red,";
@@ -19,6 +19,10 @@ void write_csv_header(std::ostream& csv_file, const Model& m)
 
 void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationResults& simulation_results, const Model& m)
 {
+	// TODO: is this correct handling
+	if(simulation_results.ticks_until_stable > 100000)
+		return;
+
 	const std::size_t n_vertices = boost::num_vertices(m.graph());
 
 	for (auto [k,v] : m.all_global_property_strs())
@@ -32,16 +36,16 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 	csv_file << count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.is_bot(v); }) << ",";
 
 	// n_speaking_green
-	auto n_speaking_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v); });
+	auto n_speaking_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
 	csv_file << n_speaking_green << ",";
 	// n_speaking_red
-	auto n_speaking_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v); });
+	auto n_speaking_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
 	csv_file << n_speaking_red << ",";
 	// n_silenced_green
-	auto n_silenced_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v); });
+	auto n_silenced_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
 	csv_file << n_silenced_green << ",";
 	// n_silenced_red
-	auto n_silenced_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v); });
+	auto n_silenced_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
 	csv_file << n_silenced_red << ",";
 
 	// ticks_until_stable
@@ -70,11 +74,20 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 			n_more_color_flips++;
 	}
 
+	csv_file << (static_cast<double>(n_0_color_flips) / n_vertices) << ",";
+	csv_file << (static_cast<double>(n_1_color_flips) / n_vertices) << ",";
+	csv_file << (static_cast<double>(n_2_color_flips) / n_vertices) << ",";
+	csv_file << (static_cast<double>(n_more_color_flips) / n_vertices) << ",";
+
+
 	// accuracy
+	double mean_accuracy = 0;
 	std::size_t n_accuracy_below_50 = 0, n_accuracy_50_to_60 = 0, n_accuracy_60_to_70 = 0, n_accuracy_70_to_80 = 0, n_accuracy_80_to_90 = 0, n_accuracy_above_90 = 0;
 	for (auto v : vertices(m.graph()))
 	{
 		double perception_accuracy = 1 - simulation_results.perception_error[v];
+		mean_accuracy += perception_accuracy;
+
 		if(perception_accuracy < 0.5)
 			n_accuracy_below_50++;
 		if(perception_accuracy >= 0.5 && perception_accuracy < 0.6)
@@ -88,10 +101,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		if(perception_accuracy >= 0.9)
 			n_accuracy_above_90++;
 	}
-	csv_file << (static_cast<double>(n_0_color_flips) / n_vertices) << ",";
-	csv_file << (static_cast<double>(n_1_color_flips) / n_vertices) << ",";
-	csv_file << (static_cast<double>(n_2_color_flips) / n_vertices) << ",";
-	csv_file << (static_cast<double>(n_more_color_flips) / n_vertices) << ",";
+	mean_accuracy = mean_accuracy / boost::num_vertices(m.graph());
 
 	csv_file << (static_cast<double>(n_accuracy_below_50) / n_vertices) << ",";
 	csv_file << (static_cast<double>(n_accuracy_50_to_60) / n_vertices) << ",";
@@ -99,6 +109,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 	csv_file << (static_cast<double>(n_accuracy_70_to_80) / n_vertices) << ",";
 	csv_file << (static_cast<double>(n_accuracy_80_to_90) / n_vertices) << ",";
 	csv_file << (static_cast<double>(n_accuracy_above_90) / n_vertices) << ",";
+	csv_file << mean_accuracy << ",";
 
 	// dominating color in clusters
 	if(m.n_clusters() == 1)
@@ -112,8 +123,8 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 	}
 	else
 	{
-		auto n_green_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v); });
-		auto n_red_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v); });
+		auto n_green_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
+		auto n_red_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
 
 		std::size_t n_cluster_green_dominates = 0, n_cluster_red_dominates = 0;
 		for(std::size_t i_cluster = 0; i_cluster < m.n_clusters(); i_cluster++)
@@ -127,7 +138,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		csv_file << n_cluster_green_dominates << "," << n_cluster_red_dominates << ",";
 
 		// n_speaking_green_by_cluster
-		auto n_speaking_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v); });
+		auto n_speaking_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
 		csv_file << "\"";
 		csv_file << n_speaking_green_by_cluster[0];
 		for (std::size_t i = 1; i < n_speaking_green_by_cluster.size(); i++) 
@@ -135,7 +146,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		csv_file << "\",";
 			
 		// n_speaking_red_by_cluster
-		auto n_speaking_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v); });
+		auto n_speaking_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
 		csv_file << "\"";
 		csv_file << n_speaking_red_by_cluster[0];
 		for (std::size_t i = 1; i < n_speaking_red_by_cluster.size(); i++) 
@@ -143,7 +154,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		csv_file << "\",";
 
 		// n_silenced_green_by_cluster
-		auto n_silenced_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v); });
+		auto n_silenced_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
 		csv_file << "\"";
 		csv_file << n_silenced_green_by_cluster[0];
 		for (std::size_t i = 1; i < n_silenced_green_by_cluster.size(); i++) 
@@ -151,7 +162,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		csv_file << "\",";
 		
 		// n_silenced_red_by_cluster
-		auto n_silenced_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v); });
+		auto n_silenced_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
 		csv_file << "\"";
 		csv_file << n_silenced_red_by_cluster[0];
 		for (std::size_t i = 1; i < n_silenced_red_by_cluster.size(); i++) 
