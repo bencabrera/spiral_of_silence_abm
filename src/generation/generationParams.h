@@ -11,8 +11,8 @@ class GenerationParams {
 
 		std::string expression_threshold_init = "Unif(0,1)";	
 		std::string inner_confidence_init = "Unif(0,1)";	
-		std::string network_model = "BA(3)";
-		std::string bot_attachment_method = "BA(1)";
+		std::string network_model = "PreferentialAttachment(3,1)";
+		std::string bot_attachment_method = "PreferentialAttachment(3,1)";
 
 		bool is_directed = false;
 

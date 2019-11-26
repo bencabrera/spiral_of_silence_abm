@@ -100,5 +100,5 @@ void Model::write_to_gml(std::ostream& ostr)
 	graph_attributes["alpha"] = std::to_string(_alpha);
 	graph_attributes["n_clusters"] = std::to_string(_n_clusters);
 
-	::write_to_gml(ostr, g, vertex_attributes, {}, graph_attributes);
+	::write_to_gml(ostr, g, _is_directed, vertex_attributes, {}, graph_attributes);
 }
