@@ -72,7 +72,7 @@ TEST_CASE("Reading graph writing it and reading again should yield same graph","
 	auto [g, vertex_attributes, edge_attributes, graph_attributes] = read_from_gml(file);
 
 	std::stringstream ss;
-	write_to_gml(ss,g,vertex_attributes,edge_attributes,graph_attributes);
+	write_to_gml(ss,g,true,vertex_attributes,edge_attributes,graph_attributes);
 	ss.seekg(0);
 
 	auto [g2, vertex_attributes2, edge_attributes2, graph_attributes2] = read_from_gml(ss);

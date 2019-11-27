@@ -1,8 +1,8 @@
 {
     "bot_attachment_method": [
-		"BarabasiAlbert(1)",
-		"BarabasiAlbert(2)",
-		"BarabasiAlbert(3)"
+		"PreferentialAttachment(1,1)",
+		"PreferentialAttachment(2,1)",
+		"PreferentialAttachment(3,1)"
 	],
     "expression_threshold_init": [
 		"Unif(0,1)",
@@ -12,6 +12,7 @@
     "is_directed": [false],
     "n_bots": [10],
     "n_user": [50],
-    "network_model": ["BarabasiAlbert(3)"],
-    "ratio_valence_green": [0.5]
+    "network_model": ["PreferentialAttachment(3,1)"],
+    "ratio_valence_green": [0.5],
+	"bot_influence": [1]
 }
