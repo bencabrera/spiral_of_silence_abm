@@ -80,7 +80,14 @@ GraphGenerationResults graph_generation(Graph& g, const GenerationParams params,
 		auto tmp_priors = parse_matrix(param_strs[1]);
 		if(tmp_priors.size() != 1)
 			throw FormatException("Prior vector needs to be row vector.");
-		auto priors = tmp_priors[0];
+		auto priors_double = tmp_priors[0];
+		
+		std::vector<std::size_t> priors;
+		for (auto p : priors_double) {
+			float tmp;
+			std::modf(p,&tmp);
+			priors.push_back(static_cast<std::size_t>(tmp));
+		}
 
 		auto p = std::stod(param_strs[2]);
 
