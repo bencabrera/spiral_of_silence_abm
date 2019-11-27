@@ -22,6 +22,7 @@
 #include "generation/generation.h"
 #include "simulation/simulateUntilStable.h"
 #include "simulation/writeSimulationResultsToCsv.h"
+#include "cliHelpers.h"
 
 void cli_progress_bar(std::size_t i_progress, std::size_t n, std::string additional_msg = "", std::size_t bar_width = 60)
 {
@@ -195,6 +196,8 @@ int main(int argc, const char** argv)
 		std::lock_guard<std::mutex> lock(csv_mutex);
 		progress_update(i_param, n_params);
 	}
+
+	auto start_time = get_timestamp();
 	for(std::size_t i_thread = 0; i_thread < n_threads; i_thread++)
 	{
 		futures.push_back(std::async(std::launch::async, run_simulation, i_thread, std::ref(csv_file), std::ref(parameter_space), n_runs, mts[i_thread], std::ref(csv_mutex), std::ref(param_mutex), std::ref(i_param), n_params, epsilon));
@@ -202,6 +205,10 @@ int main(int argc, const char** argv)
 
 	for (auto& f : futures)
 		f.get();
+
+	auto end_time = get_timestamp();
+
+	std::cout << std::endl << "Computation duration: " << duration_to_readable(Duration(end_time-start_time)) << std::endl;
 
 	return 0;
 }

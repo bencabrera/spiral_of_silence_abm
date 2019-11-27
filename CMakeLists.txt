@@ -42,6 +42,8 @@ set (CPP_FILES
 	src/simulation/performOneStep.cpp
 	src/simulation/simulateUntilStable.cpp
 	src/simulation/writeSimulationResultsToCsv.cpp
+
+	src/cliHelpers.cpp
 )
 
 add_library(All STATIC ${CPP_FILES})

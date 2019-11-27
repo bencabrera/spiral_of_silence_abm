@@ -97,3 +97,4 @@ double draw_from_distribution(const std::string param, std::mt19937& mt)
 
 	throw FormatException("Distribution type not recognized.");
 }
+
