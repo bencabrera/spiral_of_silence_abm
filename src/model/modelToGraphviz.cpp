@@ -20,6 +20,12 @@ namespace {
 			{
 				out << "[shape=\"circle\",style=filled";
 
+				if(_options.fontsize >= 0)
+					out << ",fontsize=" << _options.fontsize;
+
+				if(_options.fixed_vertex_size >= 0)
+					out << ",fixedsize=shape,width=" << _options.fixed_vertex_size << ",height=" << _options.fixed_vertex_size;
+
 				std::string label;
 				if(_options.show_bots)
 					label += _m.is_bot(v) ? "\nB" : "";
@@ -52,9 +58,30 @@ namespace {
 			const Model& _m;
 			const GraphvizOptions _options;
 	};
+
+	class EdgeWriter {
+		public:
+			EdgeWriter(const Model& m,GraphvizOptions options) 
+				: _m(m), _options(options)
+			{}
+
+			void operator()(std::ostream& out, const Edge& e) const 
+			{
+				if(!_m.is_directed()) {
+					if(boost::source(e,_m.graph()) > boost::target(e,_m.graph()))
+						out << "[style=invis,constraint=false]";
+					else
+						out << "[dir=none]";
+				}
+			}
+
+		private:
+			const Model& _m;
+			const GraphvizOptions _options;
+	};
 }
 
 void draw_to_graphviz(std::ostream& ostr, const Model& m, GraphvizOptions options)
 {
-	boost::write_graphviz(ostr, m.graph(), VertexWriter(m,options));
+	boost::write_graphviz(ostr, m.graph(), VertexWriter(m,options), EdgeWriter(m,options));
 }

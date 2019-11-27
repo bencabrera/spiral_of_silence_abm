@@ -55,6 +55,10 @@ class Model
 		{
 			return _alpha;
 		}
+		inline bool is_directed() const
+		{
+			return _is_directed;
+		}
 
 		inline std::size_t cluster(Vertex v) const
 		{

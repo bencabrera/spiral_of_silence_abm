@@ -27,6 +27,8 @@ int main(int argc, const char** argv)
 		("graphviz-show-expression-threshold", "If set the graphviz model includes expression threshold.")
 		("graphviz-show-inner-confidence", "If set the graphviz model includes inner confidence.")
 		("graphviz-show-bots", "If set the graphviz model includes marker for bots.")
+		("graphviz-fixed-vertex-size", "Fixed vertex size, independent of label.",cxxopts::value<double>())
+		("graphviz-vertex-fontsize", "Size of label in vertex.",cxxopts::value<double>())
 
 		("epsilon", "Sensitivity parameter.", cxxopts::value<double>()->default_value("1e-4"))
 	;
@@ -58,6 +60,10 @@ int main(int argc, const char** argv)
 		graphviz_options.show_inner_confidence = true;
 	if(args.count("graphviz-show-bots"))
 		graphviz_options.show_bots = true;
+	if(args.count("graphviz-fixed-vertex-size"))
+		graphviz_options.fixed_vertex_size = args["graphviz-fixed-vertex-size"].as<double>();
+	if(args.count("graphviz-vertex-fontsize"))
+		graphviz_options.fontsize = args["graphviz-vertex-fontsize"].as<double>();
 
 	// read in model
     std::ifstream input_graph_file(input_graph_path);
