@@ -26,7 +26,7 @@ std::vector<std::size_t> generate_general_stochastic_block_model_undirected(Grap
 		for (auto e : edges(cluster)) 
 			boost::add_edge(boost::source(e,cluster)+cur,boost::target(e,cluster)+cur,g);
 
-		avg_density = 2 * static_cast<double>(boost::num_edges(cluster)) / std::pow(boost::num_vertices(cluster),2);
+		avg_density += 2 * static_cast<double>(boost::num_edges(cluster)) / std::pow(boost::num_vertices(cluster),2);
 	}
 
 	avg_density = avg_density / priors.size();

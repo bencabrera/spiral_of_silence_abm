@@ -122,7 +122,7 @@ namespace {
 		if(state == VALUE_READING)
 		{
 			if(in_string)
-				throw FormatException("Missing final closing '\"' in key value pair.");
+				throw FormatException("Missing final closing '\"' in key value pair." + str);
 			else
 				rtn[key] = value;
 		}
@@ -135,7 +135,6 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 {
 	const std::string text(std::istreambuf_iterator<char>(istr), {});
 
-	const std::regex graph_attributes_regex("graph\\s*\\[([^\\[]+)");
 	const std::regex node_regex("node *\\[([^\\]]+)");
 	const std::regex edge_regex("edge *\\[([^\\]]+)");
 
@@ -147,11 +146,14 @@ std::tuple<Graph,std::map<std::string, VertexPropertyMap<std::string>>, std::map
 	// get graph attributes
 	std::map<std::string,std::string> graph_labels;
 	{
-		std::sregex_iterator dir_it_begin(text.begin(), text.end(), graph_attributes_regex);
-		std::sregex_iterator dir_it_end;
-		if(dir_it_begin != dir_it_end)
+		auto pos = text.find("node");
+		if(pos != std::string::npos)
 		{
-			std::string val = (*dir_it_begin)[1];
+			std::string val = text.substr(0,pos);
+			auto pos2 = val.find("[");
+			if(pos2 == std::string::npos)
+				throw FormatException("Gml file must start with 'graph ['");
+			val = val.substr(pos2+1);
 			std::string clean = std::regex_replace(val, std::regex("graph\\s*\\["), "");
 			clean = std::regex_replace(clean, std::regex("node"), "");
 			clean = std::regex_replace(clean, std::regex("\\n\\s+"), "\n");
