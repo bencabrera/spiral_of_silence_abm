@@ -273,3 +273,59 @@ plot_probability_to_win_by_how_many_central <- function(data) {
 		facet_wrap(~gamma)
 	ggsave("probability_to_win_by_how_many_central.pdf",width=8,height=3)
 }
+
+
+# For JBE paper
+plot_minority_majority_dist_by_inter_cluster_density <- function(data) {
+	data_small <- data[,c("inter_cluster_density","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage",	percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+	tmp <- aggregate(percentage ~ inter_cluster_density + group, data = tmp, mean)
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+
+	ggplot(tmp,aes(x = inter_cluster_density, y = percentage, fill = group)) +
+		geom_area() +
+		scale_y_continuous(name = "Percentage of individuals", labels = scales::percent) +
+		scale_x_continuous(name = "Inter community density", labels = scales::percent) +
+		scale_fill_brewer(type = "div") +
+		labs(fill = "Group") +
+		theme_classic()
+
+	ggsave("minority_majority_dist_by_inter_cluster_density.pdf",width=15,height=9,units="cm")
+}
+
+plot_minority_majority_dist_by_numbers_of_communities <- function(data) {
+	data_small <- data[,c("n_communities","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage",	percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+	tmp <- aggregate(percentage ~ n_communities + group, data = tmp, mean)
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+
+	ggplot(tmp,aes(x = n_communities, y = percentage, fill = group)) +
+		geom_col() +
+		scale_y_continuous(name = "Percentage of individuals", labels = scales::percent) +
+		scale_x_continuous(name = "Number of communities",breaks=seq(2,10)) +
+		scale_fill_brewer(type = "div") +
+		labs(fill = "Group") +
+		theme_classic()
+
+	ggsave("minority_majority_dist_by_number_of_communities.pdf",width=15,height=9,units="cm")
+}
