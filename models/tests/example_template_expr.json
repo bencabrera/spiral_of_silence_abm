@@ -1,0 +1,11 @@
+{
+	"expression": "PreferentialAttachment({{M}},1)",
+	"templates": [
+		{
+			"var": "M",
+			"from": 1,
+			"to": 3,
+			"step": 1
+		}
+	]
+}

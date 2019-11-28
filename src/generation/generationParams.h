@@ -25,3 +25,5 @@ class GenerationParams {
 
 std::vector<GenerationParams> build_param_space_from_json(std::istream& istr);
 std::vector<GenerationParams> build_param_space_from_json(nlohmann::json obj);
+
+nlohmann::json build_param_list_from_template(nlohmann::json tpl);

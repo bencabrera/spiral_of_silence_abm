@@ -1,0 +1,24 @@
+{
+    "bot_attachment_method": {
+		"expression": "PreferentialAttachment({{M}},1)",
+		"templates": [
+			{
+				"var": "M",
+				"from": 1,
+				"to": 3,
+				"step": 1
+			}
+		]
+	},
+    "expression_threshold_init": [
+		"Unif(0,1)",
+		"Unif(0,2)"
+	],
+    "inner_confidence_init": ["Unif(0,1)"],
+    "is_directed": [false],
+    "n_bots": [10],
+    "n_user": [50],
+    "network_model": ["PreferentialAttachment(3,1)"],
+    "ratio_valence_green": [0.5],
+	"bot_influence": [1]
+}
