@@ -1,4 +1,4 @@
-#include "../../../libs/catch/catch.hpp"
+#include <catch/catch.hpp>
 #include "../../tests/test_helpers.hpp"
 #include "../generationParams.h"
 #include "../generation.h"

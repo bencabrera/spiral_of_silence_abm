@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../model/model.h"
-#include "../../libs/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 class GenerationParams {
 	public:

@@ -6,13 +6,13 @@
 
 #include <boost/graph/topological_sort.hpp>
 
-#include "../libs/cxxopts/cxxopts.hpp"
+#include <cxxopts/cxxopts.hpp>
 
 #include "model/model.h"
 #include "generation/generationParams.h"
 #include "generation/generation.h"
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     cxxopts::Options options("simulation", "Spiral of Silence simulation tool");
 	options.add_options()
@@ -21,6 +21,7 @@ int main(int argc, const char** argv)
 		("c,config-input", "Configration parameters file.", cxxopts::value<std::string>())
 
 		("generate-example-config", "Generates an config file containing some default values.", cxxopts::value<std::string>())
+		("print-n-edges", "Print number of edges in generated graph.")
 	;
 	auto args = options.parse(argc, argv);
 	
@@ -55,6 +56,10 @@ int main(int argc, const char** argv)
 
 	std::ofstream gml_output_file(args["gml-output"].as<std::string>());
 	m.write_to_gml(gml_output_file);
+
+	if(args.count("print-n-edges")) {
+		std::cout << boost::num_edges(m.graph()) << std::endl;
+	}
 
 	return 0;
 }

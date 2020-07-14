@@ -6,7 +6,7 @@ void write_csv_header(std::ostream& csv_file, const Model& m)
 		csv_file << k << ",";
 	}
 
-	csv_file << "n_individuals, n_users, n_bots, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red,";
+	csv_file << "n_individuals, n_edges, n_users, n_bots, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red,";
 	csv_file << "ticks_until_stable, most_central_valence, most_central_silenced_start, most_central_silenced_end,";
 	csv_file << "percent_0_color_flips, percent_1_color_flips, percent_2_color_flips, percent_more_color_flips,";
 	csv_file << "percent_accuracy_below_50, percent_accuracy_50_to_60, percent_accuracy_60_to_70, percent_accuracy_70_to_80, percent_accuracy_80_to_90, percent_accuracy_above_90,avg_accuracy,";
@@ -24,12 +24,14 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 		return;
 
 	const std::size_t n_vertices = boost::num_vertices(m.graph());
+	const std::size_t n_edges = boost::num_edges(m.graph());
 
 	for (auto [k,v] : m.all_global_property_strs())
 		csv_file << "\"" << v << "\",";
 
 	// n_individuals
 	csv_file << n_vertices << ",";
+	csv_file << n_edges << ",";
 	// n_users
 	csv_file << count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return !m.is_bot(v); }) << ",";
 	// n_bots

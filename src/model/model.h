@@ -97,7 +97,7 @@ class Model
 
 		inline bool is_silenced(Vertex v) const
 		{
-			return confidence(v) <= expression_threshold(v);
+			return confidence(v) <= expression_threshold(v) && !is_bot(v);
 		}
 
 		inline bool is_speaking_out(Vertex v) const

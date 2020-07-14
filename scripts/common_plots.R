@@ -303,7 +303,7 @@ plot_minority_majority_dist_by_inter_cluster_density <- function(data) {
 	ggsave("minority_majority_dist_by_inter_cluster_density.pdf",width=15,height=9,units="cm")
 }
 
-plot_minority_majority_dist_by_numbers_of_communities <- function(data) {
+plot_minority_majority_dist_by_numbers_of_communities <- function(data,pdf_path) {
 	data_small <- data[,c("n_communities","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
 	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
 	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
@@ -327,5 +327,117 @@ plot_minority_majority_dist_by_numbers_of_communities <- function(data) {
 		labs(fill = "Group") +
 		theme_classic()
 
-	ggsave("minority_majority_dist_by_number_of_communities.pdf",width=15,height=9,units="cm")
+	if(missing(pdf_path)) {
+		ggsave("minority_majority_dist_by_number_of_communities.pdf",width=15,height=9,units="cm")
+	} else {
+		ggsave(pdf_path,width=15,height=9,units="cm")
+	}
+}
+
+plot_minority_dist_by_numbers_of_communities <- function(data,pdf_path) {
+	data_small <- data[,c("n_communities","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage",	percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+	tmp <- aggregate(percentage ~ n_communities + group, data = tmp, mean)
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+
+	# select only minority
+	tmp <- data.table(tmp)
+	tmp <- tmp[group=="Minority"]
+
+	ggplot(tmp,aes(x = n_communities, y = percentage)) +
+		geom_col() +
+		scale_y_continuous(name = "Size of speaking minority", labels = scales::percent) +
+		scale_x_continuous(name = "Number of communities",breaks=seq(2,10)) +
+		scale_fill_brewer(type = "div") +
+		labs(fill = "Group") +
+		theme_classic()
+
+	if(missing(pdf_path)) {
+		ggsave("minority_majority_dist_by_number_of_communities.pdf",width=15,height=9,units="cm")
+	} else {
+		ggsave(pdf_path,width=15,height=9,units="cm")
+	}
+}
+
+plot_minority_majority_by_icd_const_density <- function(data,pdf_path) {
+	data_small <- data[,c("inter_cluster_density","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage",	percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+	tmp <- aggregate(percentage ~ inter_cluster_density + group, data = tmp, mean)
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+
+	ggplot(tmp,aes(x = inter_cluster_density, y = percentage, fill = group)) +
+		geom_col() +
+		scale_y_continuous(name = "Percentage of individuals", labels = scales::percent) +
+		scale_x_continuous(name = "Inter community density", labels = scales::percent) +
+		scale_fill_brewer(type = "div") +
+		labs(fill = "Group") +
+		theme_classic()
+
+	if(missing(pdf_path)) {
+		ggsave("minority_majority_by_icd_const_density.pdf",width=15,height=9,units="cm")
+	} else {
+		ggsave(pdf_path,width=15,height=9,units="cm")
+	}
+}
+
+plot_minority_by_icd_const_density <- function(data,pdf_path) {
+	data_small <- data[,c("inter_cluster_density","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage",	percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+	# tmp <- aggregate(percentage ~ inter_cluster_density + group, data = tmp, mean)
+	# tmp <- aggregate(percentage ~ inter_cluster_density + group, data = tmp, function(x) c(mean = mean(x), runs = length(x), quant = quantile(x, probs=c(0.95))))
+	tmp <- aggregate(percentage ~ inter_cluster_density + group, data = tmp, function(x) c(mean = mean(x), runs = length(x), sd = sd(x), quant = quantile(x, probs=c(0.05,0.25,0.75,0.95))))
+
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+
+	# select only minority
+	tmp <- data.table(tmp)
+	tmp <- tmp[group=="Minority"]
+	print(tmp)
+
+	ggplot(tmp,aes(x = inter_cluster_density, y = percentage.mean)) +
+		geom_point() +
+		geom_errorbar(aes(ymin=percentage.quant.5., ymax=percentage.quant.95.), width=.0005, size=0.25) +
+		# geom_errorbar(aes(ymin=percentage.quant.25., ymax=percentage.quant.75.), width=.0005, size=0.25) +
+		# geom_errorbar(aes(ymin=percentage.mean - percentage.sd, ymax=percentage.mean + percentage.sd), width=.0005, size=0.25) +
+		scale_y_continuous(name = "Size of speaking minority", labels = scales::percent) +
+		scale_x_continuous(name = expression(paste("Inter-community density (",rho[out],")")), labels = scales::percent) +
+		scale_fill_brewer(type = "div") +
+		labs(fill = "Group") +
+		theme_classic()
+
+	if(missing(pdf_path)) {
+		ggsave("minority_by_icd_const_density.pdf",width=15,height=9,units="cm")
+	} else {
+		ggsave(pdf_path,width=15,height=9,units="cm")
+	}
 }

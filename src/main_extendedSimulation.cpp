@@ -12,7 +12,7 @@
 
 #include <boost/graph/topological_sort.hpp>
 
-#include "../libs/cxxopts/cxxopts.hpp"
+#include <cxxopts/cxxopts.hpp>
 
 #include "model/model.h"
 #include "model/modelProperties.hpp"
@@ -139,7 +139,7 @@ void run_simulation(
 }
 
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     cxxopts::Options options("simulation", "Spiral of Silence simulation tool");
 	options.add_options()
