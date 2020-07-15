@@ -9,6 +9,7 @@ The implementation was used e.g. in the scientific publication
 where further details on the model assumptions can be found.
 
 <img width="270" src="./docs/initial.svg"><img width="270" src="./docs/step3.svg"><img width="270" src="./docs/stable.svg">
+
 *Exemplary simulation run of a model instance from the initial configuration (left) to the stable state(right).*
 
 ## Getting Started / Compilation 
