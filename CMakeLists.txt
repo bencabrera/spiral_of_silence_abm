@@ -5,7 +5,8 @@ project(Spiral_of_Silence_ABM)
 set(CMAKE_CXX_STANDARD 17)
 
 # set compiler flags to treat warnings as errors etc.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -Werror=return-type -Wuninitialized -Wmaybe-uninitialized")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -Werror=return-type -Wuninitialized -Wmaybe-uninitialized")
+find_package(Boost)
 
 # include library paths
 include_directories(${Boost_INCLUDE_DIRS})
