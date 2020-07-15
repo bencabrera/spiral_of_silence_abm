@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	options.add_options()
 		("h,help", "Produce help message.")
 		("i,gml-input", "Path to input model in GML format.", cxxopts::value<std::string>())
-		("o,stationary-config-csv-output", "Path to csv file to which results should be appended.", cxxopts::value<std::string>())
+		("o,results-csv-output", "Path to the csv file to which results should be appended.", cxxopts::value<std::string>())
 		("wait-for-input-after-step", "If this flag is set the program waits for a key stroke after each step.")
 		("step-to-graphviz", "If set then after every step model is drawn .dot graphviz file.", cxxopts::value<std::string>())
 		("graphviz-show-confidence", "If set the graphviz model includes confidences.")
@@ -92,9 +92,9 @@ int main(int argc, char** argv)
 		}
 	});
 
-	if(args.count("stationary-config-csv-output"))
+	if(args.count("results-csv-output"))
 	{
-		const std::string csv_path = args["stationary-config-csv-output"].as<std::string>();
+		const std::string csv_path = args["results-csv-output"].as<std::string>();
 
 		std::ofstream csv_file(csv_path);
 		write_csv_header(csv_file,m);

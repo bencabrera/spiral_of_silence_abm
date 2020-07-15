@@ -14,13 +14,13 @@
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("simulation", "Spiral of Silence simulation tool");
+    cxxopts::Options options("generation", "Generates model instances (as .gml files) based on the provided model parameters (as .json files)");
 	options.add_options()
 		("h,help", "Produce help message.")
-		("o,gml-output", "Path to input model in GML format.", cxxopts::value<std::string>())
-		("c,config-input", "Configration parameters file.", cxxopts::value<std::string>())
+		("o,gml-output", "File path where the generated model should be stored (as GML)", cxxopts::value<std::string>())
+		("c,param-json-input", "File path of model parameters (as JSON).", cxxopts::value<std::string>())
 
-		("generate-example-config", "Generates an config file containing some default values.", cxxopts::value<std::string>())
+		("generate-example-config", "Generates an exemplary config file containing some default values.", cxxopts::value<std::string>())
 		("print-n-edges", "Print number of edges in generated graph.")
 	;
 	auto args = options.parse(argc, argv);
@@ -40,13 +40,13 @@ int main(int argc, char** argv)
 	}
 
 	// check if necessary parameters were provided
-	if(!args.count("config-input") || !args.count("gml-output"))
+	if(!args.count("param-json-input") || !args.count("gml-output"))
 	{
-		std::cerr << "Please specify --config-input and --gml-output." << std::endl; 
+		std::cerr << "Please specify --param-json-input and --gml-output." << std::endl; 
 		return 1;
 	}
 
-	std::ifstream config_file(args["config-input"].as<std::string>());
+	std::ifstream config_file(args["param-json-input"].as<std::string>());
 	GenerationParams params = GenerationParams::parse_from_json(config_file);
 
 	std::random_device rd;

@@ -141,11 +141,11 @@ void run_simulation(
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("simulation", "Spiral of Silence simulation tool");
+    cxxopts::Options options("param_simulation", "Automated model generation and simulation of the SOS model for a whole parameter space");
 	options.add_options()
 		("h,help", "Produce help message.")
-		("c,parameter-space-json-input", "Path to input model in GML format.", cxxopts::value<std::string>())
-		("o,csv-output", "Path to csv file to which results should be appended.", cxxopts::value<std::string>())
+		("c,param-json-input", "Path to input model in GML format.", cxxopts::value<std::string>())
+		("o,results-csv-output", "Path to csv file to which results should be appended.", cxxopts::value<std::string>())
 		("r,number-of-runs", "Number of runs.", cxxopts::value<std::size_t>()->default_value("1000"))
 		("epsilon", "Sensitivity parameter.", cxxopts::value<double>()->default_value("1e-4"))
 		("number-of-threads", "How many threads should be used.", cxxopts::value<std::size_t>()->default_value("1"))
@@ -159,13 +159,13 @@ int main(int argc, char** argv)
 	}
 
 	// check if necessary parameters were provided
-	if(!args.count("parameter-space-json-input") || !args.count("csv-output"))
+	if(!args.count("param-json-input") || !args.count("csv-output"))
 	{
-		std::cerr << "Please specify --parameter-space-json-input && --csv-output." << std::endl; 
+		std::cerr << "Please specify --param-json-input && --csv-output." << std::endl; 
 		return 1;
 	}
 
-	const std::string input_param_space_path = args["parameter-space-json-input"].as<std::string>();
+	const std::string input_param_space_path = args["param-json-input"].as<std::string>();
 	const double epsilon = args["epsilon"].as<double>();
 	const std::size_t n_runs = args["number-of-runs"].as<std::size_t>();
 	const std::string csv_path = args["csv-output"].as<std::string>();

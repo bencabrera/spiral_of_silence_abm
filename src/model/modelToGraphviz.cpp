@@ -38,7 +38,7 @@ namespace {
 
 				boost::trim(label);
 
-				if(!label.empty())
+				// if(!label.empty())
 					out << ",label=\"" << label << "\"";
 
 				if(_m.is_silenced(v))
