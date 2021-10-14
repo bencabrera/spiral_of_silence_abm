@@ -441,3 +441,82 @@ plot_minority_by_icd_const_density <- function(data,pdf_path) {
 		ggsave(pdf_path,width=15,height=9,units="cm")
 	}
 }
+
+boxplot_minority_by_icd_const_density <- function(data,pdf_path) {
+	data_small <- data[,c("inter_cluster_density","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage",  percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+	# tmp <- aggregate(percentage ~ inter_cluster_density + group, data = tmp, function(x) c(mean = mean(x), runs = length(x), sd = sd(x), quant = quantile(x, probs=c(0.05,0.25,0.75,0.95))))
+
+	# subsampling to get less extreme values
+	set.seed(0)
+	tmp <- sample_n(tmp, 5000)
+
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+	tmp$inter_cluster_density <- round(tmp$inter_cluster_density * 100, digits = 3)
+	tmp$inter_cluster_density <- factor(tmp$inter_cluster_density)
+
+	# select only minority
+	tmp <- data.table(tmp)
+	tmp <- tmp[group=="Minority"]
+
+	ggplot(tmp,aes(x = inter_cluster_density, y = percentage)) +
+		geom_boxplot() +
+		scale_y_continuous(name = "Size of speaking minority", labels = scales::percent) +
+		scale_x_discrete(name = expression(paste("Inter-community density (",rho[out],") in %"))) +
+		theme_classic() 
+
+	if(missing(pdf_path)) {
+		ggsave("boxplot_minority_by_icd_const_density.pdf",width=15,height=9,units="cm")
+	} else {
+		ggsave(pdf_path,width=15,height=9,units="cm")
+	}
+}
+
+boxplot_minority_dist_by_numbers_of_communities <- function(data,pdf_path) {
+	data_small <- data[,c("n_communities","n_speaking_green","n_silenced_green","n_speaking_red","n_silenced_red")]
+	data_small$n_silenced <- data_small$n_silenced_green+data_small$n_silenced_red
+	data_small$percent_green <- data_small$n_speaking_green / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_red <- data_small$n_speaking_red / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+	data_small$percent_gray <- data_small$n_silenced / (data_small$n_speaking_green+data_small$n_speaking_red+data_small$n_silenced)
+
+	data_small$percent_majority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, max)
+	data_small$percent_minority <- apply(cbind(data_small$percent_green, data_small$percent_red), 1, min)
+
+	tmp <- gather(data_small, key = "group", value = "percentage", percent_majority, percent_minority, percent_gray)
+	tmp$group <- substring(tmp$group,9)
+
+	set.seed(0)
+	tmp <- sample_n(tmp, 5000)
+
+	# re-order levels (default is alphabetical)
+	tmp$group <- factor(tmp$group,levels = c("majority", "gray", "minority"),labels=c("Majority","Silenced","Minority"))
+	tmp$n_communities <- factor(tmp$n_communities)
+
+	# select only minority
+	tmp <- data.table(tmp)
+	tmp <- tmp[group=="Minority"]
+
+	ggplot(tmp,aes(x = n_communities, y = percentage)) +
+		geom_boxplot() +
+		scale_y_continuous(name = "Size of speaking minority", labels = scales::percent) +
+		scale_x_discrete(name = "Number of communities") +
+		scale_fill_brewer(type = "div") +
+		labs(fill = "Group") +
+		theme_classic()
+
+	if(missing(pdf_path)) {
+		ggsave("boxplot_minority_dist_by_number_of_communities.pdf",width=15,height=9,units="cm")
+	} else {
+		ggsave(pdf_path,width=15,height=9,units="cm")
+	}
+}
