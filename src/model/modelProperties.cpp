@@ -1,4 +1,5 @@
 #include "modelProperties.hpp"
+#include <numeric>
 
 Vertex most_central_vertex(const Model& m)
 {
