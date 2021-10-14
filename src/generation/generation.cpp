@@ -109,6 +109,7 @@ Model generate(const GenerationParams params, std::mt19937& mt)
 	model.global_properties["inner_confidence_init_method"] = params.inner_confidence_init;
 	model.global_properties["network_model"] = params.network_model;
 	model.global_properties["bot_attachment_method"] = params.bot_attachment_method;
+	model.global_properties["ratio_valence_green"] = std::to_string(params.ratio_valence_green);
 
 	return model;
 }

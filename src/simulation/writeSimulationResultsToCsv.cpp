@@ -6,15 +6,111 @@ void write_csv_header(std::ostream& csv_file, const Model& m)
 		csv_file << k << ",";
 	}
 
-	csv_file << "n_individuals, n_edges, n_users, n_bots, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red,";
+	csv_file << "n_individuals, n_edges, n_users, n_bots,";
+	csv_file << GLOBAL_DISTRIBUTION_HEADER;
 	csv_file << "ticks_until_stable, most_central_valence, most_central_silenced_start, most_central_silenced_end,";
 	csv_file << "percent_0_color_flips, percent_1_color_flips, percent_2_color_flips, percent_more_color_flips,";
 	csv_file << "percent_accuracy_below_50, percent_accuracy_50_to_60, percent_accuracy_60_to_70, percent_accuracy_70_to_80, percent_accuracy_80_to_90, percent_accuracy_above_90,avg_accuracy,";
-	csv_file << "n_cluster_green_dominates,n_cluster_red_dominates,";
-	csv_file << "n_speaking_green_by_cluster,n_speaking_red_by_cluster,n_silenced_green_by_cluster,n_silenced_red_by_cluster,";
+	csv_file << CLUSTER_DISTRIBUTION_HEADER;
 	csv_file << "avg_degree_green,avg_degree_red,";
 	csv_file << "n_top_degree_green,n_top_degree_red";
 	csv_file << std::endl;
+}
+
+void write_cluster_distribution(std::ostream& csv_file, const Model& m) {
+	// n_speaking_green
+	auto n_speaking_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << n_speaking_green << ",";
+	// n_speaking_red
+	auto n_speaking_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << n_speaking_red << ",";
+	// n_silenced_green
+	auto n_silenced_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << n_silenced_green << ",";
+	// n_silenced_red
+	auto n_silenced_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << n_silenced_red << ",";
+
+	write_cluster_distribution(csv_file, m, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red);
+}
+
+std::tuple<std::size_t, std::size_t, std::size_t, std::size_t> write_global_distribution(std::ostream& csv_file, const Model& m) {
+	std::tuple<std::size_t, std::size_t, std::size_t, std::size_t> rtn;
+
+	// n_speaking_green
+	std::get<0>(rtn) = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << std::get<0>(rtn) << ",";
+	// n_speaking_red
+	std::get<1>(rtn) = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << std::get<1>(rtn) << ",";
+	// n_silenced_green
+	std::get<2>(rtn) = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << std::get<2>(rtn) << ",";
+	// n_silenced_red
+	std::get<3>(rtn) = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
+	csv_file << std::get<3>(rtn) << ",";
+
+	return rtn;
+}
+
+void write_cluster_distribution(std::ostream& csv_file, const Model& m, std::size_t n_speaking_green, std::size_t n_speaking_red, std::size_t n_silenced_green, std::size_t n_silenced_red) {
+	if(m.n_clusters() == 1)
+	{
+		csv_file << ((n_speaking_green >= n_speaking_red) ? "1" : "0") << ",";
+		csv_file << ((n_speaking_green >= n_speaking_red) ? "0" : "1") << ",";
+		csv_file << n_speaking_green << ",";
+		csv_file << n_speaking_red << ",";
+		csv_file << n_silenced_green << ",";
+		csv_file << n_silenced_red << ",";
+	}
+	else
+	{
+		auto n_green_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
+		auto n_red_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
+
+		std::size_t n_cluster_green_dominates = 0, n_cluster_red_dominates = 0;
+		for(std::size_t i_cluster = 0; i_cluster < m.n_clusters(); i_cluster++)
+		{
+			if(n_green_speaking_by_cluster[i_cluster] >= n_red_speaking_by_cluster[i_cluster])
+				n_cluster_green_dominates++;
+			else
+				n_cluster_red_dominates++;
+		}
+
+		csv_file << n_cluster_green_dominates << "," << n_cluster_red_dominates << ",";
+
+		// n_speaking_green_by_cluster
+		auto n_speaking_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
+		csv_file << "\"";
+		csv_file << n_speaking_green_by_cluster[0];
+		for (std::size_t i = 1; i < n_speaking_green_by_cluster.size(); i++) 
+			csv_file << "," << n_speaking_green_by_cluster[i];
+		csv_file << "\",";
+
+		// n_speaking_red_by_cluster
+		auto n_speaking_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
+		csv_file << "\"";
+		csv_file << n_speaking_red_by_cluster[0];
+		for (std::size_t i = 1; i < n_speaking_red_by_cluster.size(); i++) 
+			csv_file << "," << n_speaking_red_by_cluster[i];
+		csv_file << "\",";
+
+		// n_silenced_green_by_cluster
+		auto n_silenced_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
+		csv_file << "\"";
+		csv_file << n_silenced_green_by_cluster[0];
+		for (std::size_t i = 1; i < n_silenced_green_by_cluster.size(); i++) 
+			csv_file << "," << n_silenced_green_by_cluster[i];
+		csv_file << "\",";
+
+		// n_silenced_red_by_cluster
+		auto n_silenced_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
+		csv_file << "\"";
+		csv_file << n_silenced_red_by_cluster[0];
+		for (std::size_t i = 1; i < n_silenced_red_by_cluster.size(); i++) 
+			csv_file << "," << n_silenced_red_by_cluster[i];
+		csv_file << "\",";
+	}
 }
 
 void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationResults& simulation_results, const Model& m)
@@ -37,18 +133,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 	// n_bots
 	csv_file << count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.is_bot(v); }) << ",";
 
-	// n_speaking_green
-	auto n_speaking_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
-	csv_file << n_speaking_green << ",";
-	// n_speaking_red
-	auto n_speaking_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
-	csv_file << n_speaking_red << ",";
-	// n_silenced_green
-	auto n_silenced_green = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
-	csv_file << n_silenced_green << ",";
-	// n_silenced_red
-	auto n_silenced_red = count_vertices_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
-	csv_file << n_silenced_red << ",";
+	auto [n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red] = write_global_distribution(csv_file, m);
 
 	// ticks_until_stable
 	csv_file << simulation_results.ticks_until_stable << ",";
@@ -114,63 +199,7 @@ void write_simulation_results_to_csv(std::ostream& csv_file, const SimulationRes
 	csv_file << mean_accuracy << ",";
 
 	// dominating color in clusters
-	if(m.n_clusters() == 1)
-	{
-		csv_file << ((n_speaking_green >= n_speaking_red) ? "1" : "0") << ",";
-		csv_file << ((n_speaking_green >= n_speaking_red) ? "0" : "1") << ",";
-		csv_file << n_speaking_green << ",";
-		csv_file << n_speaking_red << ",";
-		csv_file << n_silenced_green << ",";
-		csv_file << n_silenced_red << ",";
-	}
-	else
-	{
-		auto n_green_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
-		auto n_red_speaking_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
-
-		std::size_t n_cluster_green_dominates = 0, n_cluster_red_dominates = 0;
-		for(std::size_t i_cluster = 0; i_cluster < m.n_clusters(); i_cluster++)
-		{
-			if(n_green_speaking_by_cluster[i_cluster] >= n_red_speaking_by_cluster[i_cluster])
-				n_cluster_green_dominates++;
-			else
-				n_cluster_red_dominates++;
-		}
-
-		csv_file << n_cluster_green_dominates << "," << n_cluster_red_dominates << ",";
-
-		// n_speaking_green_by_cluster
-		auto n_speaking_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && !m.is_silenced(v) && !m.is_bot(v); });
-		csv_file << "\"";
-		csv_file << n_speaking_green_by_cluster[0];
-		for (std::size_t i = 1; i < n_speaking_green_by_cluster.size(); i++) 
-			csv_file << "," << n_speaking_green_by_cluster[i];
-		csv_file << "\",";
-			
-		// n_speaking_red_by_cluster
-		auto n_speaking_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && !m.is_silenced(v) && !m.is_bot(v); });
-		csv_file << "\"";
-		csv_file << n_speaking_red_by_cluster[0];
-		for (std::size_t i = 1; i < n_speaking_red_by_cluster.size(); i++) 
-			csv_file << "," << n_speaking_red_by_cluster[i];
-		csv_file << "\",";
-
-		// n_silenced_green_by_cluster
-		auto n_silenced_green_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN && m.is_silenced(v) && !m.is_bot(v); });
-		csv_file << "\"";
-		csv_file << n_silenced_green_by_cluster[0];
-		for (std::size_t i = 1; i < n_silenced_green_by_cluster.size(); i++) 
-			csv_file << "," << n_silenced_green_by_cluster[i];
-		csv_file << "\",";
-		
-		// n_silenced_red_by_cluster
-		auto n_silenced_red_by_cluster = count_vertices_with_predicate_by_clusters(m, [](auto v, const Model& m) -> bool { return m.valence(v) == RED && m.is_silenced(v) && !m.is_bot(v); });
-		csv_file << "\"";
-		csv_file << n_silenced_red_by_cluster[0];
-		for (std::size_t i = 1; i < n_silenced_red_by_cluster.size(); i++) 
-			csv_file << "," << n_silenced_red_by_cluster[i];
-		csv_file << "\",";
-	}
+	write_cluster_distribution(csv_file, m, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red);
 
 	// avg_degree_green
 	auto avg_degree_green = average_degree_with_predicate(m, [](auto v, const Model& m) -> bool { return m.valence(v) == GREEN; });

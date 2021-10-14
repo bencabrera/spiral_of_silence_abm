@@ -21,6 +21,7 @@ int main(int argc, char** argv)
 		("h,help", "Produce help message.")
 		("i,gml-input", "Path to input model in GML format.", cxxopts::value<std::string>())
 		("o,results-csv-output", "Path to the csv file to which results should be appended.", cxxopts::value<std::string>())
+		("step-results-csv-output", "Path to the csv file to which intermediate results for every step are written.", cxxopts::value<std::string>())
 		("wait-for-input-after-step", "If this flag is set the program waits for a key stroke after each step.")
 		("step-to-graphviz", "If set then after every step model is drawn .dot graphviz file.", cxxopts::value<std::string>())
 		("graphviz-show-confidence", "If set the graphviz model includes confidences.")
@@ -81,7 +82,15 @@ int main(int argc, char** argv)
 		draw_to_graphviz(graphviz_file, m, graphviz_options);			
 	}
 
-	SimulationResults simulation_results = simulate_until_stable(m, epsilon, [&args, &wait_for_input, &graphviz_options](Model& m) {
+	std::ofstream step_results_csv_file;
+	if(args.count("step-results-csv-output")) {
+		step_results_csv_file.open(args["step-results-csv-output"].as<std::string>());
+		step_results_csv_file << GLOBAL_DISTRIBUTION_HEADER;
+		step_results_csv_file << CLUSTER_DISTRIBUTION_HEADER;
+		step_results_csv_file << std::endl;
+	}
+
+	SimulationResults simulation_results = simulate_until_stable(m, epsilon, [&args, &wait_for_input, &graphviz_options, &step_results_csv_file](Model& m) {
 		if(wait_for_input)
 			std::cin.get();
 
@@ -90,7 +99,14 @@ int main(int argc, char** argv)
 			std::ofstream graphviz_file(args["step-to-graphviz"].as<std::string>());
 			draw_to_graphviz(graphviz_file, m, graphviz_options);			
 		}
+
+		if(args.count("step-results-csv-output")) {
+			auto [n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red] = write_global_distribution(step_results_csv_file, m);
+			write_cluster_distribution(step_results_csv_file, m, n_speaking_green, n_speaking_red, n_silenced_green, n_silenced_red);
+			step_results_csv_file << std::endl;
+		}
 	});
+
 
 	if(args.count("results-csv-output"))
 	{

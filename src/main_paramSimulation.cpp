@@ -159,16 +159,16 @@ int main(int argc, char** argv)
 	}
 
 	// check if necessary parameters were provided
-	if(!args.count("param-json-input") || !args.count("csv-output"))
+	if(!args.count("param-json-input") || !args.count("results-csv-output"))
 	{
-		std::cerr << "Please specify --param-json-input && --csv-output." << std::endl; 
+		std::cerr << "Please specify --param-json-input && --results-csv-output." << std::endl; 
 		return 1;
 	}
 
 	const std::string input_param_space_path = args["param-json-input"].as<std::string>();
 	const double epsilon = args["epsilon"].as<double>();
 	const std::size_t n_runs = args["number-of-runs"].as<std::size_t>();
-	const std::string csv_path = args["csv-output"].as<std::string>();
+	const std::string csv_path = args["results-csv-output"].as<std::string>();
 	const std::size_t n_threads = args["number-of-threads"].as<std::size_t>();
 
 	std::random_device rd;
